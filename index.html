@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dual Page Viewer</title>
+<link rel="icon" href="ikon2.png" type="image/png">
+<style>
+  :root {
+    --bg: #0b0e16;
+    --glass: rgba(255, 255, 255, 0.06);
+    --accent: #00ffc3;
+    --text: #f5f5f5;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    background: radial-gradient(circle at top, #0f1624 0%, #06080e 100%);
+    overflow: hidden;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 90px;
+    backdrop-filter: blur(14px);
+    background: var(--glass);
+    border-right: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+    position: relative;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+  }
+
+  .logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--accent), #00aaff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: bold;
+    color: #0b0e16;
+    box-shadow: 0 0 20px rgba(0,255,195,0.4);
+    animation: glow 3s ease-in-out infinite alternate;
+  }
+
+  @keyframes glow {
+    from { box-shadow: 0 0 10px rgba(0,255,195,0.4); }
+    to { box-shadow: 0 0 25px rgba(0,255,195,0.8); }
+  }
+
+  .menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .menu button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--text);
+    cursor: pointer;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    position: relative;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+  }
+
+  .menu button:hover {
+    transform: scale(1.12);
+    box-shadow: 0 0 15px rgba(0,255,195,0.4);
+    background: rgba(255,255,255,0.05);
+  }
+
+  .menu button.active {
+    background: linear-gradient(135deg, var(--accent), #00aaff);
+    color: #000;
+    font-weight: bold;
+    box-shadow: 0 0 20px rgba(0,255,195,0.6);
+  }
+
+  .menu button::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 70px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.8);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.2s ease;
+  }
+
+  .menu button:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(5px);
+  }
+
+  iframe {
+    flex: 1;
+    border: none;
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.4s ease;
+  }
+
+  iframe.fade {
+    opacity: 0;
+  }
+
+  /* Responsif (ubah sidebar ke bawah untuk HP) */
+  @media (max-width: 700px) {
+    body { flex-direction: column; }
+    .sidebar {
+      flex-direction: row;
+      width: 100%;
+      height: 80px;
+      border-right: none;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      justify-content: space-around;
+    }
+    .menu { flex-direction: row; gap: 10px; }
+    .menu button::after {
+      left: 50%;
+      top: -45px;
+      transform: translateX(-50%);
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="logo">🌐</div>
+
+    <div class="menu">
+      <button class="active" data-tooltip="Beranda"
+        onclick="loadPage(this, 'beranda.html')">🏠</button>
+
+      <button data-tooltip="Halaman KN"
+        onclick="loadPage(this, 'https://website-pribadi.github.io/kn/index.html')">📘</button>
+
+      <button data-tooltip="Halaman ORTU"
+        onclick="loadPage(this, 'https://website-pribadi.github.io/ortu/index.html')">👨‍👩‍👧‍👦</button>
+
+      <button data-tooltip="Pengaturan"
+        onclick="alert('Fitur pengaturan belum diaktifkan!')">⚙️</button>
+    </div>
+  </div>
+
+  <iframe id="content" src="beranda.html"></iframe>
+
+  <script>
+    const iframe = document.getElementById('content');
+
+    function loadPage(btn, url) {
+      document.querySelectorAll('.menu button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      // Efek fade-out sebelum ganti halaman
+      iframe.classList.add('fade');
+      setTimeout(() => {
+        iframe.src = url;
+        iframe.onload = () => iframe.classList.remove('fade');
+      }, 250);
+    }
+  </script>
+</body>
+</html>

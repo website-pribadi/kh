@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beranda</title>
+<link rel="icon" href="ikon2.png" type="image/png">
+<style>
+  :root {
+    --bg: #0b0e16;
+    --card: rgba(255, 255, 255, 0.06);
+    --accent: #00ffc3;
+    --text: #f5f5f5;
+    --glass-border: rgba(255,255,255,0.1);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    background: radial-gradient(circle at top, #0f1624 0%, #06080e 100%);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+    animation: fadeIn 1.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  header {
+    margin-top: 40px;
+    text-align: center;
+  }
+
+  header h1 {
+    font-size: 2.4em;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(0,255,195,0.6);
+    margin-bottom: 10px;
+  }
+
+  header p {
+    font-size: 1.1em;
+    color: #b0b0b0;
+    max-width: 600px;
+    margin: auto;
+  }
+
+  .card-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 60px;
+    padding: 0 20px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    width: 280px;
+    padding: 28px 20px;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 0 25px rgba(0,255,195,0.05);
+    transition: 0.35s ease;
+    text-align: center;
+  }
+
+  .card:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 0 35px rgba(0,255,195,0.25);
+  }
+
+  .card .icon {
+    font-size: 2.6em;
+    margin-bottom: 16px;
+    color: var(--accent);
+    animation: pulse 2s infinite alternate;
+  }
+
+  @keyframes pulse {
+    from { text-shadow: 0 0 10px rgba(0,255,195,0.3); }
+    to { text-shadow: 0 0 20px rgba(0,255,195,0.8); }
+  }
+
+  .card h3 {
+    margin: 0;
+    font-size: 1.3em;
+    color: var(--text);
+  }
+
+  .card p {
+    color: #aaa;
+    font-size: 0.95em;
+    margin-top: 8px;
+  }
+
+  footer {
+    margin-top: auto;
+    padding: 25px;
+    text-align: center;
+    font-size: 0.9em;
+    color: #777;
+  }
+
+  footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  footer a:hover {
+    text-decoration: underline;
+  }
+
+  /* Responsif */
+  @media (max-width: 700px) {
+    header h1 { font-size: 1.8em; }
+    .card { width: 90%; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Selamat Datang 🌐</h1>
+    <p>Jelajahi halaman-halaman menarik di sistem <b>Dual Page Viewer</b> ini — desain futuristik dengan animasi lembut dan nuansa kaca transparan.</p>
+  </header>
+
+  <div class="card-container">
+    <div class="card">
+      <div class="icon">📘</div>
+      <h3>Halaman KN</h3>
+      <p>Akses langsung ke halaman pengetahuan untuk memperluas wawasanmu.</p>
+    </div>
+
+    <div class="card">
+      <div class="icon">👨‍👩‍👧‍👦</div>
+      <h3>Halaman ORTU</h3>
+      <p>Tempat informasi dan interaksi untuk orang tua dan wali santri.</p>
+    </div>
+
+    <div class="card">
+      <div class="icon">⚙️</div>
+      <h3>Pengaturan</h3>
+      <p>Sedang dalam pengembangan — fitur kustomisasi akan segera hadir.</p>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 <a href="#">Website Pribadi</a> | Desain Futuristik oleh Khalid</p>
+  </footer>
+</body>
+</html>
