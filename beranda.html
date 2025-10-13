@@ -3,159 +3,227 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Beranda</title>
+<title>Ruang Pribadi Khalid</title>
 <link rel="icon" href="ikon2.png" type="image/png">
 <style>
-  :root {
-    --bg: #0b0e16;
-    --card: rgba(255, 255, 255, 0.06);
-    --accent: #00ffc3;
-    --text: #f5f5f5;
-    --glass-border: rgba(255,255,255,0.1);
-  }
-
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    height: 100vh;
-    font-family: 'Poppins', sans-serif;
-    background: radial-gradient(circle at top, #0f1624 0%, #06080e 100%);
-    color: var(--text);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow-x: hidden;
-    animation: fadeIn 1.2s ease;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  header {
-    margin-top: 40px;
-    text-align: center;
-  }
-
-  header h1 {
-    font-size: 2.4em;
-    color: var(--accent);
-    letter-spacing: 2px;
-    text-shadow: 0 0 10px rgba(0,255,195,0.6);
-    margin-bottom: 10px;
-  }
-
-  header p {
-    font-size: 1.1em;
-    color: #b0b0b0;
-    max-width: 600px;
-    margin: auto;
-  }
-
-  .card-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 24px;
-    margin-top: 60px;
-    padding: 0 20px;
-  }
-
-  .card {
-    background: var(--card);
-    border: 1px solid var(--glass-border);
-    border-radius: 18px;
-    width: 280px;
-    padding: 28px 20px;
-    backdrop-filter: blur(14px);
-    box-shadow: 0 0 25px rgba(0,255,195,0.05);
-    transition: 0.35s ease;
-    text-align: center;
-  }
-
-  .card:hover {
-    transform: translateY(-8px) scale(1.03);
-    box-shadow: 0 0 35px rgba(0,255,195,0.25);
-  }
-
-  .card .icon {
-    font-size: 2.6em;
-    margin-bottom: 16px;
-    color: var(--accent);
-    animation: pulse 2s infinite alternate;
-  }
-
-  @keyframes pulse {
-    from { text-shadow: 0 0 10px rgba(0,255,195,0.3); }
-    to { text-shadow: 0 0 20px rgba(0,255,195,0.8); }
-  }
-
-  .card h3 {
-    margin: 0;
-    font-size: 1.3em;
-    color: var(--text);
-  }
-
-  .card p {
-    color: #aaa;
-    font-size: 0.95em;
-    margin-top: 8px;
-  }
-
-  footer {
-    margin-top: auto;
-    padding: 25px;
-    text-align: center;
-    font-size: 0.9em;
-    color: #777;
-  }
-
-  footer a {
-    color: var(--accent);
-    text-decoration: none;
-  }
-
-  footer a:hover {
-    text-decoration: underline;
-  }
-
-  /* Responsif */
-  @media (max-width: 700px) {
-    header h1 { font-size: 1.8em; }
-    .card { width: 90%; }
-  }
+:root {
+  --bg-dark: #0b0e16;
+  --bg-card: #141829;
+  --accent: #00ffc3;
+  --accent2: #7a5cff;
+  --text: #f5f5f5;
+  --subtext: #b0b0b0;
+  --border: rgba(255,255,255,0.08);
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body {
+  min-height:100vh; font-family:'Poppins',sans-serif;
+  background:linear-gradient(145deg,#090d16,#101628);
+  color:var(--text);
+  display:flex; align-items:center; justify-content:center;
+  text-align:center; flex-direction:column; overflow:auto;
+}
+.time-info { position:absolute; top:20px; left:25px; text-align:left; line-height:1.3; animation:fadeIn 1.2s ease; }
+.time-info h1{ font-size:2em; color:var(--accent); margin-bottom:4px; text-shadow:0 0 10px rgba(0,255,195,0.5);}
+.time-info h2{ font-size:1em; color:var(--accent2); text-shadow:0 0 10px rgba(122,92,255,0.5); }
+.clock { position:absolute; top:20px; right:25px; font-size:1.6em; color:var(--accent); text-shadow:0 0 10px rgba(0,255,195,0.4); animation:fadeIn 1.2s ease; font-weight:500; }
+.main { max-width:800px; padding:0 20px; }
+.card { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:25px; margin-top:30px; box-shadow:0 0 25px rgba(0,0,0,0.3); transition:0.3s; }
+.card:hover { transform:translateY(-4px); box-shadow:0 0 35px rgba(0,255,195,0.15); }
+.card h3{ color:var(--accent); margin-bottom:10px; font-size:1.2em; }
+.card p{ color:var(--subtext); line-height:1.7; white-space:pre-line; }
+footer{ position:absolute; bottom:20px; font-size:0.85em; color:#777; }
+@keyframes fadeIn { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);} }
+.schedule-table { width:100%; border-collapse:collapse; text-align:left; font-size:0.95em; margin-top:10px; }
+.schedule-table th, .schedule-table td{ padding:10px 12px; border:1px solid var(--border); }
+.schedule-table th{ color:var(--accent2); text-shadow:0 0 5px rgba(122,92,255,0.4);}
+.schedule-table td{ color:var(--text);}
+.schedule-table tbody tr:nth-child(even){ background:rgba(255,255,255,0.03);}
+.schedule-table tbody tr:hover{ background:rgba(0,255,195,0.1); cursor:pointer; transition:0.3s;}
+input[type="file"], #import-btn, #add-btn, select, input{ margin-bottom:10px; padding:5px; border-radius:6px; border:1px solid var(--border); background:var(--bg-card); color:var(--text);}
+button { padding:4px 8px; margin:0 2px; border:none; border-radius:6px; cursor:pointer; font-size:0.85em; }
+button#add-btn{ background:#00ffc3; color:#000; margin-bottom:10px;}
+#add-form { display:none; margin-top:10px; }
+#add-form input, #add-form select { margin-right:5px; }
+#add-form button { margin-left:2px; }
+@media (max-width:600px){
+  .time-info{ top:15px; left:15px;}
+  .time-info h1{ font-size:1.3em;}
+  .time-info h2{ font-size:1em;}
+  .clock{ top:15px; right:15px; font-size:1.2em;}
+  .card{ width:90%; margin:20px auto;}
+  #add-form input, #add-form select { width:100%; margin:5px 0; }
+}
 </style>
 </head>
 <body>
-  <header>
-    <h1>Selamat Datang 🌐</h1>
-    <p>Jelajahi halaman-halaman menarik di sistem <b>Dual Page Viewer</b> ini — desain futuristik dengan animasi lembut dan nuansa kaca transparan.</p>
-  </header>
 
-  <div class="card-container">
-    <div class="card">
-      <div class="icon">📘</div>
-      <h3>Halaman KN</h3>
-      <p>Akses langsung ke halaman pengetahuan untuk memperluas wawasanmu.</p>
-    </div>
+<div class="time-info">
+  <h1 id="greeting">Selamat Datang, Khalid</h1>
+  <h2 id="today">Memuat tanggal...</h2>
+</div>
 
-    <div class="card">
-      <div class="icon">👨‍👩‍👧‍👦</div>
-      <h3>Halaman ORTU</h3>
-      <p>Tempat informasi dan interaksi untuk orang tua dan wali santri.</p>
-    </div>
+<div class="clock" id="clock">00:00:00</div>
 
-    <div class="card">
-      <div class="icon">⚙️</div>
-      <h3>Pengaturan</h3>
-      <p>Sedang dalam pengembangan — fitur kustomisasi akan segera hadir.</p>
-    </div>
+<div class="main">
+  <div class="card">
+    <h3>Catatan Hari Ini</h3>
+    <p id="daily-note"></p>
   </div>
 
-  <footer>
-    <p>© 2025 <a href="#">Website Pribadi</a> | Desain Futuristik oleh Khalid</p>
-  </footer>
+  <div class="card">
+    <h3>Jadwal Pelajaran Sedang Berlangsung</h3>
+
+
+    <table class="schedule-table" id="schedule-table">
+      <thead>
+        <tr>
+          <th>Hari</th>
+          <th>Jam</th>
+          <th>Mapel</th>
+          <th>Guru</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <p id="no-schedule" style="margin-top:10px; color:var(--subtext); display:none;">Tidak ada jadwal yang sedang berlangsung saat ini.</p>
+  </div>
+</div>
+
+<footer>© 2025 Khalid — Ruang Pribadi.</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+// ======================
+// Tanggal, jam, catatan
+// ======================
+function updateDate(){ const date=new Date(); document.getElementById('today').textContent=date.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
+function updateGreeting(){ const hour=new Date().getHours(); let g=""; if(hour>=4&&hour<11)g="Selamat Pagi"; else if(hour>=11&&hour<15) g="Selamat Siang"; else if(hour>=15&&hour<18) g="Selamat Sore"; else g="Selamat Malam"; document.getElementById("greeting").textContent=g+", Khalid";}
+function updateClock(){ const now=new Date(); let h=now.getHours().toString().padStart(2,'0'), m=now.getMinutes().toString().padStart(2,'0'), s=now.getSeconds().toString().padStart(2,'0'); document.getElementById("clock").textContent=`${h}:${m}:${s} WIB`;}
+function randomDailyNote(){ const notes=[ "Tidak semua yang hening itu kosong.\nKadang di balik diam, ada proses memahami.\nHari ini cukup berjalan perlahan — sebab terburu-buru hanya membuat arah kabur.", "Setiap pagi membawa kesempatan baru.\nBukan untuk jadi sempurna, tapi untuk jadi lebih sadar dari kemarin.", "Langkah kecil pun tetap berarti.\nAsalkan tak berhenti, kau sedang maju.", "Hari ini mungkin tak mudah, tapi kau sudah sampai sejauh ini.\nItu pun sudah bentuk keberanian.", "Jangan menunggu keadaan sempurna.\nKadang ketidaksempurnaan justru membawa makna yang utuh.", "Kesunyian bukan musuh, ia tempat di mana pikiran kembali jernih.", "Ketenangan bukan datang dari luar.\nIa tumbuh dari hati yang belajar menerima." ]; document.getElementById("daily-note").textContent=notes[Math.floor(Math.random()*notes.length)];}
+updateDate(); updateGreeting(); updateClock(); randomDailyNote();
+setInterval(()=>{ updateDate(); updateGreeting(); updateClock(); loadJadwal(); },1000);
+
+// ======================
+// Supabase
+// ======================
+const supabaseUrl = "https://zawtfjszvkuudawrilqg.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inphd3RmanN6dmt1dWRhd3JpbHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0MTk2NzMsImV4cCI6MjA3NDk5NTY3M30.CGYz4-QnYb3Hu9p3fV0XoG5J8oicqZsji-YJf2UItQ8"; // ganti dengan key-mu
+const supa = supabase.createClient(supabaseUrl, supabaseKey);
+
+const tbody = document.querySelector("#schedule-table tbody");
+let jadwalData=[];
+
+// ======================
+// Load jadwal
+// ======================
+async function loadJadwal(){
+  const {data,error} = await supa.from("jadwal_pelajaran").select("*").order('id');
+  if(error){ console.error(error); return; }
+  jadwalData = data;
+  renderTable();
+}
+
+// ======================
+// Render hanya jadwal aktif
+// ======================
+function renderTable(){
+  tbody.innerHTML = "";
+  const now = new Date();
+  const nowMinutes = now.getHours()*60 + now.getMinutes();
+  const today = now.toLocaleDateString('id-ID',{weekday:'long'});
+  let hasActive = false;
+
+  jadwalData.forEach(item => {
+    if(item.jam && item.jam.includes('–') && item.hari === today){
+      const [start, end] = item.jam.split('–').map(t=>t.trim());
+      const startParts = start.split(':');
+      const endParts   = end.split(':');
+
+      if(startParts.length===2 && endParts.length===2){
+        const startMinutes = parseInt(startParts[0])*60 + parseInt(startParts[1]);
+        const endMinutes   = parseInt(endParts[0])*60 + parseInt(endParts[1]);
+
+        if(nowMinutes >= startMinutes && nowMinutes <= endMinutes){
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${item.hari || "-"}</td><td>${item.jam || "-"}</td><td>${item.mapel || "-"}</td><td>${item.guru || "-"}</td>`;
+          tbody.appendChild(tr);
+          hasActive = true;
+        }
+      }
+    }
+  });
+
+  document.getElementById('no-schedule').style.display = hasActive ? "none" : "block";
+}
+
+// ======================
+// Form tambah jadwal
+// ======================
+const addBtn = document.getElementById("add-btn");
+const addForm = document.getElementById("add-form");
+const submitBtn = document.getElementById("submit-btn");
+const cancelBtn = document.getElementById("cancel-btn");
+
+addBtn.addEventListener("click", () => addForm.style.display = "block");
+cancelBtn.addEventListener("click", () => {
+  addForm.style.display = "none";
+  document.getElementById("form-hari").value = "";
+  document.getElementById("form-jam-start").value = "";
+  document.getElementById("form-jam-end").value = "";
+  document.getElementById("form-mapel").value = "";
+  document.getElementById("form-guru").value = "";
+});
+
+submitBtn.addEventListener("click", async () => {
+  const hari = document.getElementById("form-hari").value;
+  const jamStart = document.getElementById("form-jam-start").value;
+  const jamEnd   = document.getElementById("form-jam-end").value;
+  const mapel = document.getElementById("form-mapel").value;
+  const guru  = document.getElementById("form-guru").value;
+
+  if(hari && jamStart && jamEnd && mapel && guru){
+    const jam = `${jamStart} – ${jamEnd}`;
+    const { error } = await supa.from("jadwal_pelajaran").insert([{hari,jam,mapel,guru}]);
+    if(error) console.error(error);
+    else cancelBtn.click();
+    loadJadwal();
+  } else alert("Harap isi semua field jadwal dengan benar.");
+});
+
+// ======================
+// Import CSV aman
+// ======================
+const csvInput = document.getElementById("csv-file");
+const importBtn = document.getElementById("import-btn");
+let selectedFile = null;
+
+csvInput.addEventListener("change", e=>{
+  selectedFile = e.target.files[0];
+  importBtn.style.display = selectedFile ? "inline-block" : "none";
+});
+
+importBtn.addEventListener("click", ()=>{
+  if(!selectedFile) return;
+  const reader = new FileReader();
+  reader.onload = async evt=>{
+    const lines = evt.target.result.split("\n");
+    for(let line of lines){
+      const [hari,jam,mapel,guru] = line.split(",");
+      if(hari && jam && mapel && guru && jam.includes('–')){
+        await supa.from("jadwal_pelajaran").insert([{hari,jam,mapel,guru}]);
+      }
+    }
+    selectedFile = null;
+    csvInput.value = "";
+    importBtn.style.display = "none";
+    loadJadwal();
+  };
+  reader.readAsText(selectedFile);
+});
+
+// Load awal
+loadJadwal();
+</script>
 </body>
 </html>
