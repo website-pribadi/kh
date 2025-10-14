@@ -9,7 +9,7 @@
 :root {
   --bg-dark: #0b0e16;
   --bg-card: #141829;
-  --accent: #00ffc3;
+  --accent: #00ffc3; /* Neon Cyan */
   --accent2: #7a5cff;
   --text: #f5f5f5;
   --subtext: #b0b0b0;
@@ -30,7 +30,7 @@ body {
 .main { max-width:800px; padding:0 20px; }
 .card { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:25px; margin-top:30px; box-shadow:0 0 25px rgba(0,0,0,0.3); transition:0.3s; }
 .card:hover { transform:translateY(-4px); box-shadow:0 0 35px rgba(0,255,195,0.15); }
-.card h3{ color:var(--accent); margin-bottom:10px; font-size:1.2em; }
+.card h3{ color:var(--accent); margin-bottom:15px; font-size:1.2em; }
 .card p{ color:var(--subtext); line-height:1.7; white-space:pre-line; }
 footer{ position:absolute; bottom:20px; font-size:0.85em; color:#777; }
 @keyframes fadeIn { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);} }
@@ -39,20 +39,74 @@ footer{ position:absolute; bottom:20px; font-size:0.85em; color:#777; }
 .schedule-table th{ color:var(--accent2); text-shadow:0 0 5px rgba(122,92,255,0.4);}
 .schedule-table td{ color:var(--text);}
 .schedule-table tbody tr:nth-child(even){ background:rgba(255,255,255,0.03);}
-.schedule-table tbody tr:hover{ background:rgba(0,255,195,0.1); cursor:pointer; transition:0.3s;}
-input[type="file"], #import-btn, #add-btn, select, input{ margin-bottom:10px; padding:5px; border-radius:6px; border:1px solid var(--border); background:var(--bg-card); color:var(--text);}
-button { padding:4px 8px; margin:0 2px; border:none; border-radius:6px; cursor:pointer; font-size:0.85em; }
-button#add-btn{ background:#00ffc3; color:#000; margin-bottom:10px;}
-#add-form { display:none; margin-top:10px; }
-#add-form input, #add-form select { margin-right:5px; }
-#add-form button { margin-left:2px; }
+.schedule-table tbody tr:hover{ background:rgba(0,255,195,0.1); transition:0.3s;}
+
+/* Gaya Sorotan Jadwal Sedang Berlangsung BARU (Neon Glow) */
+.active-class {
+    background: #008f76 !important; /* Latar belakang hijau pekat */
+    border: 1px solid var(--accent) !important;
+    /* Efek bayangan luar (glow) */
+    box-shadow: 0 0 12px var(--accent), inset 0 0 8px var(--accent); 
+    font-weight: bold;
+    transition: all 0.5s;
+}
+.active-class td {
+    color: var(--bg-card) !important; /* Teks berwarna gelap untuk kontras */
+}
+
+/* Gaya Daftar Tugas */
+.todo-container { text-align: left; }
+#todo-list { list-style: none; padding: 0; }
+#todo-list li {
+  padding: 10px 5px;
+  border-bottom: 1px solid var(--border);
+  word-break: break-word;
+  display: flex; 
+  align-items: center;
+}
+#todo-list li:last-child { border-bottom: none; }
+#todo-list li .task-details {
+    flex-grow: 1; 
+}
+#todo-list li .task-title {
+    font-weight: 500;
+    color: var(--text);
+    display: block;
+}
+#todo-list li .task-due {
+    font-size: 0.85em;
+    color: var(--subtext);
+    display: block;
+    margin-top: 2px;
+}
+/* Style untuk batas waktu yang sudah lewat */
+#todo-list li .task-due.overdue {
+    color: #ff5555; 
+    font-weight: bold;
+}
+/* Gaya Tombol Selesai */
+.done-btn {
+    background: var(--accent);
+    color: var(--bg-card);
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85em;
+    cursor: pointer;
+    transition: opacity 0.3s, background 0.3s;
+    margin-left: 15px;
+}
+.done-btn:hover {
+    background: #00e6a3;
+}
+
+
 @media (max-width:600px){
   .time-info{ top:15px; left:15px;}
   .time-info h1{ font-size:1.3em;}
   .time-info h2{ font-size:1em;}
-  .clock{ top:15px; right:15px; font-size:1.2em;}
+  .clock{ top:15px; right:25px; font-size:1.2em;}
   .card{ width:90%; margin:20px auto;}
-  #add-form input, #add-form select { width:100%; margin:5px 0; }
 }
 </style>
 </head>
@@ -67,14 +121,16 @@ button#add-btn{ background:#00ffc3; color:#000; margin-bottom:10px;}
 
 <div class="main">
   <div class="card">
-    <h3>Catatan Hari Ini</h3>
-    <p id="daily-note"></p>
+    <h3>Daftar Semua Tugas</h3>
+    <div class="todo-container">
+        <ul id="todo-list">
+            <li>Memuat tugas...</li>
+        </ul>
+    </div>
   </div>
 
   <div class="card">
-    <h3>Jadwal Pelajaran Sedang Berlangsung</h3>
-
-
+    <h3>Jadwal Pelajaran Hari Ini</h3>
     <table class="schedule-table" id="schedule-table">
       <thead>
         <tr>
@@ -86,7 +142,7 @@ button#add-btn{ background:#00ffc3; color:#000; margin-bottom:10px;}
       </thead>
       <tbody></tbody>
     </table>
-    <p id="no-schedule" style="margin-top:10px; color:var(--subtext); display:none;">Tidak ada jadwal yang sedang berlangsung saat ini.</p>
+    <p id="no-schedule" style="margin-top:10px; color:var(--subtext); display:none;">Tidak ada jadwal pelajaran untuk hari ini.</p>
   </div>
 </div>
 
@@ -95,28 +151,129 @@ button#add-btn{ background:#00ffc3; color:#000; margin-bottom:10px;}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <script>
 // ======================
-// Tanggal, jam, catatan
+// Konstanta Supabase
+// ======================
+const supabaseUrl = "https://bwfoeapwqdrinqgccxpw.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3Zm9lYXB3cWRyaW5xZ2NjeHB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MTUzNTYsImV4cCI6MjA3NTM5MTM1Nn0.grJkA6XjIvAOWzmWTMx-Rp8BUVdvwTd_pawNQsM0Vt8";
+const supa = supabase.createClient(supabaseUrl, supabaseKey);
+
+
+// ======================
+// Tanggal & Jam
 // ======================
 function updateDate(){ const date=new Date(); document.getElementById('today').textContent=date.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
 function updateGreeting(){ const hour=new Date().getHours(); let g=""; if(hour>=4&&hour<11)g="Selamat Pagi"; else if(hour>=11&&hour<15) g="Selamat Siang"; else if(hour>=15&&hour<18) g="Selamat Sore"; else g="Selamat Malam"; document.getElementById("greeting").textContent=g+", Khalid";}
 function updateClock(){ const now=new Date(); let h=now.getHours().toString().padStart(2,'0'), m=now.getMinutes().toString().padStart(2,'0'), s=now.getSeconds().toString().padStart(2,'0'); document.getElementById("clock").textContent=`${h}:${m}:${s} WIB`;}
-function randomDailyNote(){ const notes=[ "Tidak semua yang hening itu kosong.\nKadang di balik diam, ada proses memahami.\nHari ini cukup berjalan perlahan — sebab terburu-buru hanya membuat arah kabur.", "Setiap pagi membawa kesempatan baru.\nBukan untuk jadi sempurna, tapi untuk jadi lebih sadar dari kemarin.", "Langkah kecil pun tetap berarti.\nAsalkan tak berhenti, kau sedang maju.", "Hari ini mungkin tak mudah, tapi kau sudah sampai sejauh ini.\nItu pun sudah bentuk keberanian.", "Jangan menunggu keadaan sempurna.\nKadang ketidaksempurnaan justru membawa makna yang utuh.", "Kesunyian bukan musuh, ia tempat di mana pikiran kembali jernih.", "Ketenangan bukan datang dari luar.\nIa tumbuh dari hati yang belajar menerima." ]; document.getElementById("daily-note").textContent=notes[Math.floor(Math.random()*notes.length)];}
-updateDate(); updateGreeting(); updateClock(); randomDailyNote();
+updateDate(); updateGreeting(); updateClock();
+// Memuat jadwal setiap detik untuk update status "active-class"
 setInterval(()=>{ updateDate(); updateGreeting(); updateClock(); loadJadwal(); },1000);
 
-// ======================
-// Supabase
-// ======================
-const supabaseUrl = "https://zawtfjszvkuudawrilqg.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inphd3RmanN6dmt1dWRhd3JpbHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0MTk2NzMsImV4cCI6MjA3NDk5NTY3M30.CGYz4-QnYb3Hu9p3fV0XoG5J8oicqZsji-YJf2UItQ8"; // ganti dengan key-mu
-const supa = supabase.createClient(supabaseUrl, supabaseKey);
 
+// ======================
+// FUNGSI UTAMA PENGUBAH STATUS TUGAS
+// ======================
+async function markTaskAsDone(taskId) {
+    const li = document.getElementById(`task-${taskId}`);
+    if (li) {
+        const btn = li.querySelector('.done-btn');
+        btn.textContent = 'Memproses...';
+        btn.disabled = true;
+    }
+
+    const { error } = await supa
+        .from('tugas')
+        .update({ is_done: true }) 
+        .eq('id', taskId); 
+
+    if (error) {
+        console.error("Gagal memperbarui status tugas:", error);
+        alert(`Gagal menyelesaikan tugas: ${error.message}.`);
+    }
+
+    loadTugas(); 
+}
+
+
+// ======================
+// Daftar Tugas dari Supabase (Tabel: public.tugas)
+// ======================
+const todoList = document.getElementById("todo-list");
+
+async function loadTugas() {
+  todoList.innerHTML = "<li>Memuat tugas...</li>";
+
+  const { data, error } = await supa
+    .from("tugas") 
+    .select("id, judul, tanggal_awal, tanggal_akhir, is_done") 
+    .eq('is_done', false) 
+    .order('tanggal_awal'); 
+
+  if (error) {
+    console.error("Error fetching tasks:", error);
+    todoList.innerHTML = `<li style="color:#ff5555;">Gagal memuat daftar tugas: ${error.message}.</li>`;
+    return;
+  }
+  
+  renderTugas(data);
+}
+
+function renderTugas(tasks) {
+  todoList.innerHTML = "";
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); 
+  
+  if (!tasks || tasks.length === 0) {
+    const li = document.createElement("li");
+    li.textContent = "Tidak ada tugas aktif yang belum selesai saat ini.";
+    li.style.color = "var(--subtext)";
+    todoList.appendChild(li);
+  } else {
+    tasks.forEach(task => {
+      const li = document.createElement("li");
+      li.id = `task-${task.id}`; 
+      
+      const start = task.tanggal_awal ? new Date(task.tanggal_awal) : null;
+      const end = task.tanggal_akhir ? new Date(task.tanggal_akhir) : null;
+      
+      let dueText = '';
+      let dateStatusClass = '';
+
+      if (start) {
+          const startDateString = start.toLocaleDateString('id-ID', {day: 'numeric', month: 'short'});
+          dueText += `Mulai: ${startDateString}`;
+      }
+      
+      if (end) {
+          const endDateString = end.toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'});
+          dueText += (dueText ? ' | ' : '') + `Batas Waktu: ${endDateString}`;
+
+          if (end < today && task.is_done !== true) {
+              dateStatusClass = 'overdue';
+          }
+      } else {
+           dueText += (dueText ? ' | ' : '') + `Batas Waktu: Tidak Ditentukan`;
+      }
+      
+      li.innerHTML = `
+          <div class="task-details">
+              <span class="task-title">${task.judul || "Tugas Tanpa Judul"}</span>
+              <span class="task-due ${dateStatusClass}">${dueText || 'Tanggal tidak tersedia'}</span>
+          </div>
+          <button class="done-btn" onclick="markTaskAsDone(${task.id})">Selesai</button>
+      `;
+      
+      todoList.appendChild(li);
+    });
+  }
+}
+
+
+// ======================
+// Jadwal Pelajaran (Tampilkan berdasarkan Hari Ini)
+// ======================
 const tbody = document.querySelector("#schedule-table tbody");
 let jadwalData=[];
 
-// ======================
-// Load jadwal
-// ======================
 async function loadJadwal(){
   const {data,error} = await supa.from("jadwal_pelajaran").select("*").order('id');
   if(error){ console.error(error); return; }
@@ -124,106 +281,74 @@ async function loadJadwal(){
   renderTable();
 }
 
-// ======================
-// Render hanya jadwal aktif
-// ======================
 function renderTable(){
   tbody.innerHTML = "";
   const now = new Date();
   const nowMinutes = now.getHours()*60 + now.getMinutes();
-  const today = now.toLocaleDateString('id-ID',{weekday:'long'});
-  let hasActive = false;
+  const todayName = now.toLocaleDateString('id-ID',{weekday:'long'}); 
+  let hasSchedule = false;
 
-  jadwalData.forEach(item => {
-    if(item.jam && item.jam.includes('–') && item.hari === today){
-      const [start, end] = item.jam.split('–').map(t=>t.trim());
-      const startParts = start.split(':');
-      const endParts   = end.split(':');
+  // 1. Filter jadwal hanya untuk hari ini
+  const scheduleForToday = jadwalData.filter(item => item.hari === todayName);
 
-      if(startParts.length===2 && endParts.length===2){
-        const startMinutes = parseInt(startParts[0])*60 + parseInt(startParts[1]);
-        const endMinutes   = parseInt(endParts[0])*60 + parseInt(endParts[1]);
+  if (scheduleForToday && scheduleForToday.length > 0) {
+      hasSchedule = true;
+      
+      // 2. Tambahkan Baris Header Hari Ini
+      const headerTr = document.createElement('tr');
+      headerTr.innerHTML = `<th colspan="4" style="text-align: center; background: var(--accent2); color: var(--bg-card); padding: 8px;">${todayName.toUpperCase()}</th>`;
+      tbody.appendChild(headerTr);
 
-        if(nowMinutes >= startMinutes && nowMinutes <= endMinutes){
-          const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${item.hari || "-"}</td><td>${item.jam || "-"}</td><td>${item.mapel || "-"}</td><td>${item.guru || "-"}</td>`;
-          tbody.appendChild(tr);
-          hasActive = true;
+      // 3. Urutkan mata pelajaran hari ini berdasarkan jam mulai
+      scheduleForToday.sort((a, b) => {
+          const startTimeA = parseInt(a.jam.split('–')[0].trim().replace(':', ''));
+          const startTimeB = parseInt(b.jam.split('–')[0].trim().replace(':', ''));
+          return startTimeA - startTimeB;
+      });
+
+      // 4. Tambahkan Baris Mata Pelajaran
+      scheduleForToday.forEach(item => {
+        let rowClass = '';
+        
+        // Cek apakah mata pelajaran sedang aktif saat ini
+        if(item.jam && item.jam.includes('–')){
+            const [start, end] = item.jam.split('–').map(t=>t.trim());
+            const startParts = start.split(':');
+            const endParts   = end.split(':');
+
+            if(startParts.length===2 && endParts.length===2){
+                const startMinutes = parseInt(startParts[0])*60 + parseInt(startParts[1]);
+                const endMinutes   = parseInt(endParts[0])*60 + parseInt(endParts[1]);
+
+                // Gunakan < endMinutes agar tidak bentrok dengan awal kelas berikutnya
+                if(nowMinutes >= startMinutes && nowMinutes < endMinutes){ 
+                    rowClass = 'active-class'; 
+                }
+            }
         }
-      }
-    }
-  });
+        
+        const tr = document.createElement('tr');
+        tr.className = rowClass;
+        tr.innerHTML = `
+          <td>${item.hari || "-"}</td> 
+          <td>${item.jam || "-"}</td>
+          <td>${item.mapel || "-"}</td>
+          <td>${item.guru || "-"}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+  }
 
-  document.getElementById('no-schedule').style.display = hasActive ? "none" : "block";
+  // Tampilkan/sembunyikan pesan "Tidak ada jadwal"
+  document.getElementById('no-schedule').style.display = hasSchedule ? "none" : "block";
+  document.getElementById('schedule-table').style.display = hasSchedule ? 'table' : 'none';
 }
 
 // ======================
-// Form tambah jadwal
+// Load Data Awal
 // ======================
-const addBtn = document.getElementById("add-btn");
-const addForm = document.getElementById("add-form");
-const submitBtn = document.getElementById("submit-btn");
-const cancelBtn = document.getElementById("cancel-btn");
-
-addBtn.addEventListener("click", () => addForm.style.display = "block");
-cancelBtn.addEventListener("click", () => {
-  addForm.style.display = "none";
-  document.getElementById("form-hari").value = "";
-  document.getElementById("form-jam-start").value = "";
-  document.getElementById("form-jam-end").value = "";
-  document.getElementById("form-mapel").value = "";
-  document.getElementById("form-guru").value = "";
-});
-
-submitBtn.addEventListener("click", async () => {
-  const hari = document.getElementById("form-hari").value;
-  const jamStart = document.getElementById("form-jam-start").value;
-  const jamEnd   = document.getElementById("form-jam-end").value;
-  const mapel = document.getElementById("form-mapel").value;
-  const guru  = document.getElementById("form-guru").value;
-
-  if(hari && jamStart && jamEnd && mapel && guru){
-    const jam = `${jamStart} – ${jamEnd}`;
-    const { error } = await supa.from("jadwal_pelajaran").insert([{hari,jam,mapel,guru}]);
-    if(error) console.error(error);
-    else cancelBtn.click();
-    loadJadwal();
-  } else alert("Harap isi semua field jadwal dengan benar.");
-});
-
-// ======================
-// Import CSV aman
-// ======================
-const csvInput = document.getElementById("csv-file");
-const importBtn = document.getElementById("import-btn");
-let selectedFile = null;
-
-csvInput.addEventListener("change", e=>{
-  selectedFile = e.target.files[0];
-  importBtn.style.display = selectedFile ? "inline-block" : "none";
-});
-
-importBtn.addEventListener("click", ()=>{
-  if(!selectedFile) return;
-  const reader = new FileReader();
-  reader.onload = async evt=>{
-    const lines = evt.target.result.split("\n");
-    for(let line of lines){
-      const [hari,jam,mapel,guru] = line.split(",");
-      if(hari && jam && mapel && guru && jam.includes('–')){
-        await supa.from("jadwal_pelajaran").insert([{hari,jam,mapel,guru}]);
-      }
-    }
-    selectedFile = null;
-    csvInput.value = "";
-    importBtn.style.display = "none";
-    loadJadwal();
-  };
-  reader.readAsText(selectedFile);
-});
-
-// Load awal
 loadJadwal();
+loadTugas(); 
 </script>
 </body>
 </html>
