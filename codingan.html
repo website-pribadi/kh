@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codingan</title>
+    <link rel="icon" href="ikon2.png" type="image/png">
+    <style>
+        /* CSS untuk Layout Editor */
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .header-bar {
+            padding: 10px;
+            background-color: #2c3e50;
+            text-align: center;
+            color: #d4d4d4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .action-button {
+            padding: 8px 15px;
+            background-color: #007acc; /* Warna biru */
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+        .action-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Area utama (untuk Toggle Mode) */
+        .main-area {
+            flex-grow: 1;
+            position: relative; 
+        }
+
+        /* Textarea Input Kode (Default: Tampil Penuh) */
+        #combinedCode {
+            width: 100%;
+            height: 100%;
+            padding: 15px;
+            border: none;
+            box-sizing: border-box;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 16px;
+            resize: none;
+            outline: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        /* Iframe Hasil Preview (Default: Tersembunyi) */
+        #previewFrame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: white;
+            z-index: 5;
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-bar">
+        <span>Uji Coba HTML.</span>
+        <button id="modeButton" class="action-button" onclick="toggleMode()">Lihat Hasil</button>
+    </div>
+
+    <div class="main-area">
+        <textarea id="combinedCode" placeholder="Masukkan kode HTML LENGKAP Anda di sini..."></textarea>
+        <iframe id="previewFrame"></iframe>
+    </div>
+
+    <script>
+        const codeInput = document.getElementById('combinedCode');
+        const previewFrame = document.getElementById('previewFrame');
+        const modeButton = document.getElementById('modeButton');
+        let isEditing = true;
+
+        // Fungsi yang merender kode ke dalam iframe
+        function updatePreview() {
+            const codeContent = codeInput.value;
+            const preview = previewFrame.contentWindow.document;
+
+            preview.open();
+            preview.write(codeContent);
+            preview.close();
+        }
+
+        // Fungsi untuk menyembunyikan/menampilkan mode
+        function toggleMode() {
+            // Selalu render kode terbaru sebelum beralih
+            updatePreview();
+
+            if (isEditing) {
+                // Beralih ke mode Preview
+                codeInput.style.display = 'none';
+                previewFrame.style.display = 'block';
+                modeButton.textContent = 'Kembali';
+                isEditing = false;
+            } else {
+                // Beralih kembali ke mode Edit
+                codeInput.style.display = 'block';
+                previewFrame.style.display = 'none';
+                modeButton.textContent = 'Lihat Hasil';
+                isEditing = true;
+                codeInput.focus();
+            }
+        }
+        
+        // Listener untuk pintasan keyboard (Menggunakan Ctrl + B yang lebih aman)
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey && event.key.toLowerCase() === 'q') {
+                event.preventDefault(); 
+                toggleMode();
+            }
+        });
+
+
+        window.onload = function() {
+            updatePreview();
+        };
+    </script>
+</body>
+</html>
