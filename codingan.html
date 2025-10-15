@@ -5,7 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Codingan</title>
     <link rel="icon" href="ikon2.png" type="image/png">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/monokai.min.css">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror-addon-indent-guide@1.0.1/src/indent-guide.min.css">
     <style>
+        /* Variabel Warna dari Dashboard Khalid */
+        :root {
+            --bg-dark: #0b0e16;
+            --bg-card: #141829;
+            --accent: #00ffc3; /* Neon Cyan - Aksen utama */
+            --accent2: #7a5cff; /* Ungu/Magenta - Aksen sekunder */
+            --text: #f5f5f5;
+            --selection-bg: #5a709c; /* Warna seleksi biru tua/ungu yang lebih kuat */
+        }
+
         /* CSS untuk Layout Editor */
         body {
             font-family: sans-serif;
@@ -14,55 +30,117 @@
             flex-direction: column;
             height: 100vh;
             overflow: hidden;
+            background: var(--bg-dark);
+            color: var(--text);
         }
+        /* ... (CSS Header dan Tombol tetap sama) ... */
         .header-bar {
-            padding: 10px;
-            background-color: #2c3e50;
-            text-align: center;
-            color: #d4d4d4;
+            padding: 10px 20px;
+            background-color: var(--bg-card);
+            color: var(--text);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid rgba(0, 255, 195, 0.2);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+            z-index: 20;
+        }
+        .header-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--accent);
+            text-shadow: 0 0 8px rgba(0,255,195,0.6);
         }
         .action-button {
-            padding: 8px 15px;
-            background-color: #007acc; /* Warna biru */
-            color: white;
+            padding: 8px 18px;
+            background-color: var(--accent);
+            color: var(--bg-dark);
             border: none;
             cursor: pointer;
             font-size: 14px;
-            border-radius: 4px;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0,255,195,0.5);
         }
         .action-button:hover {
-            background-color: #0056b3;
+            background-color: #00e6a3;
+            box-shadow: 0 0 15px rgba(0,255,195,0.8);
+            transform: translateY(-2px);
         }
 
-        /* Area utama (untuk Toggle Mode) */
+        /* Area utama */
         .main-area {
             flex-grow: 1;
-            position: relative; 
+            position: relative;
+        }
+        
+        /* Gaya Khusus CodeMirror */
+        .CodeMirror {
+            width: 100% !important;
+            height: 100% !important;
+            font-size: 16px;
+            line-height: 1.5;
+            z-index: 10;
+        }
+        .cm-s-monokai.CodeMirror {
+             background: #1e1e1e;
+             color: #f8f8f2;
+        }
+        .CodeMirror-cursor {
+            border-left: 2px solid var(--accent) !important;
+        }
+        .CodeMirror-linenumber {
+            color: var(--accent2) !important;
+        }
+        
+        /* Highlight baris aktif (Latar belakangnya TIDAK OPAK/PENUH) */
+        .CodeMirror-activeline-background {
+            background: rgba(122, 92, 255, 0.1) !important;
+        }
+        
+        /* 🔥 PERBAIKAN SELEKSI (BLOK KATA SAJA) 🔥 */
+        /* Seleksi yang dibuat oleh CodeMirror */
+        .CodeMirror-selected {
+            background-color: var(--selection-bg) !important; 
         }
 
-        /* Textarea Input Kode (Default: Tampil Penuh) */
-        #combinedCode {
-            width: 100%;
-            height: 100%;
-            padding: 15px;
-            border: none;
-            box-sizing: border-box;
-            background-color: #1e1e1e;
-            color: #d4d4d4;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 16px;
-            resize: none;
-            outline: none;
+        /* Seleksi yang dibuat oleh browser (PENTING untuk kompatibilitas) */
+        ::selection {
+            background-color: var(--selection-bg) !important;
+            color: var(--text) !important;
+        }
+        /* Target khusus untuk CodeMirror, agar lebih spesifik */
+        .CodeMirror ::selection {
+            background-color: var(--selection-bg) !important;
+            color: var(--text) !important;
+        }
+
+
+        /* Highlight kecocokan kata (ketika dobel klik) */
+        .cm-matchhighlight {
+            background-color: rgba(0, 255, 195, 0.2) !important; /* Neon Cyan Transparan */
+        }
+
+        /* GARIS PENGHUBUNG INDENTASI (THE GUIDES) - TETAP ADA */
+        .cm-indent-guide {
+            border-left: 1px solid var(--accent2) !important;
+            opacity: 0.4 !important; 
+            margin-right: 4px;
+            z-index: 1; 
+        }
+        
+        /* CodeMirror berada di atas iframe */
+        #editorContainer {
             position: absolute;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
             z-index: 10;
         }
 
-        /* Iframe Hasil Preview (Default: Tersembunyi) */
+        /* Iframe Hasil Preview */
         #previewFrame {
             width: 100%;
             height: 100%;
@@ -72,31 +150,71 @@
             left: 0;
             background-color: white;
             z-index: 5;
-            display: none; 
+            display: none;
         }
     </style>
 </head>
 <body>
 
     <div class="header-bar">
-        <span>Uji Coba HTML.</span>
-        <button id="modeButton" class="action-button" onclick="toggleMode()">Lihat Hasil</button>
+        <span class="header-title">Editor Kode HTML</span>
+        <button id="modeButton" class="action-button" onclick="toggleMode()">Lihat</button>
     </div>
 
     <div class="main-area">
-        <textarea id="combinedCode" placeholder="Masukkan kode HTML LENGKAP Anda di sini..."></textarea>
+        <div id="editorContainer">
+            <textarea id="combinedCode">
+Isi Disini...
+            </textarea>
+        </div>
         <iframe id="previewFrame"></iframe>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/codemirror-addon-indent-guide@1.0.1/dist/indent-guide.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/match-highlighter.min.js"></script>
+
+
     <script>
-        const codeInput = document.getElementById('combinedCode');
         const previewFrame = document.getElementById('previewFrame');
         const modeButton = document.getElementById('modeButton');
         let isEditing = true;
+        let myCodeMirror;
 
-        // Fungsi yang merender kode ke dalam iframe
+        document.addEventListener('DOMContentLoaded', () => {
+            const textarea = document.getElementById('combinedCode');
+            myCodeMirror = CodeMirror.fromTextArea(textarea, {
+                lineNumbers: true, 
+                mode: "htmlmixed", 
+                theme: "monokai", 
+                tabSize: 4,
+                indentUnit: 4,
+                lineWrapping: true,
+                autoCloseTags: true, 
+                matchBrackets: true,
+                
+                indentGuide: true, 
+                highlightSelectionMatches: {
+                    showToken: /\w/ 
+                },
+            });
+
+            myCodeMirror.focus();
+            updatePreview();
+        });
+
+
         function updatePreview() {
-            const codeContent = codeInput.value;
+            const codeContent = myCodeMirror ? myCodeMirror.getValue() : document.getElementById('combinedCode').value;
+            
             const preview = previewFrame.contentWindow.document;
 
             preview.open();
@@ -104,39 +222,29 @@
             preview.close();
         }
 
-        // Fungsi untuk menyembunyikan/menampilkan mode
         function toggleMode() {
-            // Selalu render kode terbaru sebelum beralih
-            updatePreview();
+            updatePreview(); 
 
             if (isEditing) {
-                // Beralih ke mode Preview
-                codeInput.style.display = 'none';
+                document.getElementById('editorContainer').style.display = 'none';
                 previewFrame.style.display = 'block';
                 modeButton.textContent = 'Kembali';
                 isEditing = false;
             } else {
-                // Beralih kembali ke mode Edit
-                codeInput.style.display = 'block';
+                document.getElementById('editorContainer').style.display = 'block';
                 previewFrame.style.display = 'none';
-                modeButton.textContent = 'Lihat Hasil';
+                modeButton.textContent = 'Lihat';
                 isEditing = true;
-                codeInput.focus();
+                myCodeMirror.focus();
             }
         }
         
-        // Listener untuk pintasan keyboard (Menggunakan Ctrl + B yang lebih aman)
         document.addEventListener('keydown', function(event) {
-            if (event.ctrlKey && event.key.toLowerCase() === 'q') {
-                event.preventDefault(); 
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'q') {
+                event.preventDefault();
                 toggleMode();
             }
         });
-
-
-        window.onload = function() {
-            updatePreview();
-        };
     </script>
 </body>
 </html>
