@@ -1,283 +1,480 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Explorer Supabase | Neon Edition</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Explorer Supabase | Neon + Floating •••</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
-:root {
-  --bg-dark: #0b0e16;
-  --bg-card: #141829;
-  --accent: #00ffc3;
-  --accent2: #7a5cff;
-  --text: #f5f5f5;
-  --subtext: #b0b0b0;
-  --border: rgba(255,255,255,0.08);
+:root{
+  --bg-dark:#0b0e16;
+  --bg-card:#141829;
+  --accent:#00ffc3;
+  --accent2:#7a5cff; /* menu ungu */
+  --text:#f5f5f5;
+  --border:rgba(255,255,255,0.08);
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: "Poppins", sans-serif;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: linear-gradient(145deg, #090d16, #101628);
-  color: var(--text);
+/* basic */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:"Poppins",sans-serif;
+  background:linear-gradient(145deg,#090d16,#101628);
+  color:var(--text);
+  display:flex;
+  flex-direction:column;
 }
 
-/* HEADER */
-.header {
-  height: 55px;
-  background: var(--bg-card);
-  color: var(--accent);
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  font-size: 1.2em;
-  font-weight: 600;
-  box-shadow: 0 0 15px rgba(0, 255, 195, 0.2);
-  border-bottom: 1px solid var(--border);
-  text-shadow: 0 0 8px rgba(0,255,195,0.4);
+/* header */
+.header{
+  height:56px;
+  background:var(--bg-card);
+  display:flex;align-items:center;padding:0 20px;
+  color:var(--accent); font-weight:600; box-shadow:0 0 15px rgba(0,255,195,0.12);
+  border-bottom:1px solid var(--border); text-shadow:0 0 6px rgba(0,255,195,0.2);
 }
 
-/* AREA UTAMA */
-.file-explorer {
-  display: flex;
-  flex-grow: 1;
-  overflow: hidden;
+/* layout */
+.container{display:flex;flex:1;overflow:hidden}
+.sidebar{
+  width:340px;background:var(--bg-card);border-right:1px solid var(--border);
+  padding:14px;overflow:auto;box-shadow: inset 0 0 12px rgba(0,0,0,0.45);
+}
+.content{
+  flex:1;padding:20px;background:var(--bg-dark);overflow:auto;
 }
 
-/* SIDEBAR */
-.sidebar {
-  width: 280px;
-  background: var(--bg-card);
-  border-right: 1px solid var(--border);
-  padding: 15px;
-  overflow-y: auto;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
+/* sidebar title & actions */
+.sidebar h2{color:var(--accent2);font-size:1.05rem;margin-bottom:10px;text-shadow:0 0 8px rgba(122,92,255,0.25)}
+.root-actions{display:flex;gap:8px;margin-bottom:12px}
+.btn{
+  background:var(--accent);color:var(--bg-card);border:none;padding:8px 12px;border-radius:8px;cursor:pointer;
+  box-shadow:0 0 10px rgba(0,255,195,0.12);font-weight:600;
 }
-.sidebar h2 {
-  margin-bottom: 15px;
-  font-size: 1.1em;
-  font-weight: 600;
-  color: var(--accent2);
-  text-shadow: 0 0 8px rgba(122,92,255,0.4);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 8px;
+.btn.secondary{background:var(--accent2);color:var(--bg-card)}
+.btn:active{transform:translateY(1px)}
+
+/* tree */
+.folder-list{list-style:none;padding-left:6px}
+.folder-li{padding:4px 6px;border-radius:6px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.folder-button{
+  display:flex;align-items:center;gap:8px;flex:1;cursor:pointer;padding:6px;border-radius:6px;
+}
+.folder-button:hover{background:rgba(255,255,255,0.03)}
+.folder-button .toggle{color:var(--accent);user-select:none}
+.folder-button .name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.folder-button.selected{background:var(--accent);color:var(--bg-card);font-weight:600;box-shadow:0 0 10px rgba(0,255,195,0.18)}
+
+/* file item displayed under folder */
+.file-item{padding:6px 12px;margin-left:28px;border-radius:6px;cursor:pointer;color:var(--text);opacity:0.95}
+.file-item:hover{color:var(--accent2);background:rgba(255,255,255,0.02)}
+
+/* small three-dot trigger (visible on hover) */
+.item-controls{
+  opacity:0;transition:opacity .15s;display:flex;align-items:center;
+}
+.folder-li:hover > .item-controls{opacity:1}
+.dot-btn{
+  background:transparent;border:none;color:var(--accent2);font-weight:700;cursor:pointer;padding:4px 6px;border-radius:6px;
+}
+.dot-btn:hover{transform:scale(1.05);}
+
+/* floating menu (fixed to right) */
+.floating-menu{
+  position:fixed;
+  right:18px;
+  bottom:80px;
+  background:linear-gradient(180deg, rgba(18,10,30,0.86), rgba(20,18,30,0.86));
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:12px;
+  min-width:180px;
+  box-shadow:0 8px 30px rgba(10,6,30,0.6);
+  padding:8px; z-index:9999;
+  transform-origin:100% 100%;
+  display:none;
+  backdrop-filter: blur(6px);
 }
 
-/* TOMBOL */
-.action-bar {
-  margin-bottom: 15px;
-  display: flex;
-  gap: 8px;
+/* animation: fade+scale */
+.floating-menu.show{
+  display:block;
+  animation: popIn .14s cubic-bezier(.2,.9,.26,1);
 }
-.action-bar button {
-  background: var(--accent);
-  color: var(--bg-card);
-  border: none;
-  padding: 7px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: 0.3s;
-  box-shadow: 0 0 10px rgba(0,255,195,0.2);
-}
-.action-bar button:hover {
-  background: #00e6a3;
-  box-shadow: 0 0 20px rgba(0,255,195,0.3);
+@keyframes popIn{
+  0%{opacity:0;transform:scale(.86) translateY(6px)}
+  100%{opacity:1;transform:scale(1) translateY(0)}
 }
 
-/* POHON FILE */
-.folder-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+/* menu items */
+.floating-menu button{
+  display:flex;align-items:center;gap:8px;width:100%;
+  background:transparent;border:none;color:var(--text);padding:10px;border-radius:8px;cursor:pointer;text-align:left;
 }
-.folder-list li {
-  margin: 2px 0;
-  position: relative;
-}
-.item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.folder-list li:hover > .item-header {
-  background: rgba(255,255,255,0.05);
-}
-.folder-list li.selected > .item-header {
-  background: var(--accent);
-  color: var(--bg-card);
-  font-weight: 600;
-  box-shadow: 0 0 10px rgba(0,255,195,0.4);
-}
+.floating-menu button:hover{background:linear-gradient(90deg, rgba(122,92,255,0.06), rgba(0,255,195,0.02));color:var(--accent)}
+.sep{height:1px;background:rgba(255,255,255,0.03);margin:6px 0;border-radius:2px}
 
-.item-header::before {
-  content: "📁";
-  margin-right: 6px;
-  font-size: 1em;
+/* content panel */
+.content h3{color:var(--accent);text-shadow:0 0 8px rgba(0,255,195,0.2)}
+.file-editor{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px;min-height:260px;
+  margin-top:12px;color:var(--text);font-family:Consolas,monospace;white-space:pre-wrap;box-shadow:inset 0 0 10px rgba(0,0,0,0.4)
 }
-.folder-list li.file > .item-header::before {
-  content: "📄";
-  opacity: 0.7;
-}
-
-/* DROPDOWN */
-.controls { opacity: 0; transition: opacity 0.3s; }
-.folder-list li:hover > .item-header .controls { opacity: 1; }
-.ellipsis-button {
-  background: none;
-  border: none;
-  color: var(--accent2);
-  cursor: pointer;
-  font-weight: bold;
-  padding: 3px 6px;
-  border-radius: 4px;
-}
-.ellipsis-button:hover {
-  background: rgba(122,92,255,0.1);
-  color: var(--accent);
-}
-.dropdown-menu {
-  position: absolute;
-  right: 10px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.5);
-  padding: 6px 0;
-  display: none;
-  z-index: 100;
-}
-.dropdown-menu.visible { display: block; }
-.dropdown-menu button {
-  background: none;
-  border: none;
-  color: var(--text);
-  width: 100%;
-  text-align: left;
-  padding: 8px 14px;
-  cursor: pointer;
-}
-.dropdown-menu button:hover {
-  background: rgba(0,255,195,0.15);
-  color: var(--accent);
-}
-
-/* AREA KONTEN */
-.content-panel {
-  flex-grow: 1;
-  padding: 20px;
-  background: var(--bg-dark);
-  overflow-y: auto;
-}
-.content-panel h3 {
-  color: var(--accent);
-  text-shadow: 0 0 8px rgba(0,255,195,0.4);
-}
-.file-content {
-  background: var(--bg-card);
-  color: var(--text);
-  padding: 15px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  min-height: 300px;
-  font-family: "Consolas", monospace;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
-  white-space: pre-wrap;
-}
-.save-area {
-  margin-top: 15px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-.save-area button {
-  background: var(--accent2);
-  color: var(--bg-card);
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  box-shadow: 0 0 12px rgba(122,92,255,0.3);
-  transition: 0.3s;
-}
-.save-area button:hover {
-  background: #9270ff;
-  box-shadow: 0 0 20px rgba(122,92,255,0.4);
-}
-#save-status { color: var(--accent); font-weight: 500; }
-
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-thumb {
-  background: var(--accent2);
-  border-radius: 4px;
-}
+.save-row{margin-top:12px;display:flex;gap:10px;align-items:center}
+.small-note{color:rgba(245,245,245,0.55);font-size:0.9rem}
 </style>
 </head>
 <body>
+  <div class="header">☁️ Supabase Explorer — Neon (Floating •••)</div>
+  <div class="container">
+    <nav class="sidebar">
+      <h2>🗂️ Struktur Folder</h2>
+      <div class="root-actions">
+        <button class="btn" id="addRootFolderBtn">+ Folder root</button>
+        <button class="btn secondary" id="addRootFileBtn">+ File root</button>
+      </div>
+      <ul id="folderTree" class="folder-list">Memuat...</ul>
+    </nav>
 
-<div class="header">☁️ Supabase Explorer Neon</div>
-
-<div class="file-explorer">
-  <div class="sidebar">
-    <h2>🗂️ Struktur Direktori</h2>
-    <div class="action-bar">
-      <button onclick="addNewItem(null,'folder')">➕ Folder</button>
-      <button onclick="addNewItem(null,'file')">➕ File</button>
-    </div>
-    <ul class="folder-list" id="root-list">
-      <li style="text-align:center;">Memuat data...</li>
-    </ul>
+    <main class="content">
+      <h3 id="content-title">Pilih file</h3>
+      <p class="small-note">Klik folder untuk buka / tutup. Klik nama file untuk lihat & edit di panel kanan.</p>
+      <div id="fileEditor" class="file-editor" contenteditable="true">(Pilih file untuk menampilkan isinya)</div>
+      <div class="save-row">
+        <button class="btn" id="saveBtn">💾 Simpan</button>
+        <span id="saveStatus" class="small-note"></span>
+      </div>
+    </main>
   </div>
 
-  <div class="content-panel">
-    <h3 id="content-title">Pilih File untuk Melihat Konten</h3>
-    <p>Tipe: <span id="content-type"></span></p>
-    <div class="file-content" id="file-editor" contenteditable="false">
-      Silakan tunggu hingga data dimuat...
-    </div>
-    <div class="save-area">
-      <button onclick="saveFileContent()">💾 Simpan Perubahan</button>
-      <span id="save-status"></span>
-    </div>
+  <!-- floating menu (fixed on right-bottom) -->
+  <div id="floatingMenu" class="floating-menu" role="menu" aria-hidden="true">
+    <!-- Menu content populated dynamically -->
   </div>
-</div>
 
 <script>
-const SUPABASE_URL = 'https://zawtfjszvkuudawrilqg.supabase.co'; 
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inphd3RmanN6dmt1dWRhd3JpbHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0MTk2NzMsImV4cCI6MjA3NDk5NTY3M30.CGYz4-QnYb3Hu9p3fV0XoG5J8oicqZsji-YJf2UItQ8';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let itemCounter=1, selectedItemId=null;
+/* ---------- Supabase init ---------- */
+const SUPABASE_URL = 'https://zawtfjszvkuudawrilqg.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inphd3RmanN6dmt1dWRhd3JpbHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0MTk2NzMsImV4cCI6MjA3NDk5NTY3M30.CGYz4-QnYb3Hu9p3fV0XoG5J8oicqZsji-YJf2UItQ8';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-function buildTree(items){const root=[];const map={};items.forEach(i=>map[i.id]={...i,children:[]});Object.values(map).forEach(i=>{if(!i.parent_id)root.push(i);else if(map[i.parent_id])map[i.parent_id].children.push(i);});return root;}
-function createItemElement(d){const id=`item-${d.id}`,li=document.createElement('li');li.className=d.type;li.id=id;
-const folder=d.type==='folder';const inner=folder?`<span class="toggle-icon"></span>${d.name}`:d.name;
-const folderActions=folder?`<button onclick="addNewItem('${id}','folder');toggleMenu('${id}');">+ Folder</button><button onclick="addNewItem('${id}','file');toggleMenu('${id}');">+ File</button><hr style='border:none;border-top:1px solid var(--border);margin:5px 0;'>`:'';
-li.innerHTML=`<div class='item-header' onclick="selectItem('${id}')"><span class='item-name'>${inner}</span><div class='controls' id='controls-${id}'><button class='ellipsis-button' onclick="event.stopPropagation();toggleMenu('${id}')">•••</button><div class='dropdown-menu' id='menu-${id}'>${folderActions}<button onclick="editItemName('${id}');toggleMenu('${id}');">✏️ Edit</button><button onclick="deleteItem('${id}');toggleMenu('${id}');" style="color:#ff5555;">🗑️ Hapus</button></div></div></div>${folder?'<ul class="folder-list"></ul>':''}`;
-return li;}
+/* ---------- state ---------- */
+let currentMenuTarget = null; // { id: uuid, type: 'folder'|'file', domEl: element }
+let selectedFileId = null;
 
-function renderTree(items,ul){items.forEach(i=>{const li=createItemElement(i);ul.appendChild(li);if(i.type==='folder'&&i.children.length){const newUl=document.createElement('ul');newUl.className='folder-list';li.appendChild(newUl);i.children.sort((a,b)=>(b.type==='folder')-(a.type==='folder')||a.name.localeCompare(b.name));renderTree(i.children,newUl);}});}
-window.toggleMenu=function(id){const menu=document.getElementById(`menu-${id}`);const controls=document.getElementById(`controls-${id}`);document.querySelectorAll('.dropdown-menu.visible').forEach(m=>{if(m.id!==`menu-${id}`){m.classList.remove('visible');m.parentNode.classList.remove('active');}});menu.classList.toggle('visible');controls.classList.toggle('active');}
-document.addEventListener('click',e=>{if(!e.target.closest('.dropdown-menu,.ellipsis-button'))document.querySelectorAll('.dropdown-menu.visible').forEach(m=>m.classList.remove('visible'));});
-window.fetchAndRenderItems=async()=>{const root=document.getElementById('root-list');root.innerHTML='<li style="text-align:center;">Memuat...</li>';const {data,error}=await supabase.from('folder_items').select('*');if(error){root.innerHTML='<li style="color:red;">Gagal memuat data.</li>';return;}root.innerHTML='';const tree=buildTree(data);tree.sort((a,b)=>(b.type==='folder')-(a.type==='folder')||a.name.localeCompare(b.name));renderTree(tree,root);}
-window.addNewItem=async(parentId,type)=>{const counter=itemCounter++;const name=type==='folder'?`Folder Baru ${counter}`:`file_baru_${counter}.txt`;const parentUUID=parentId?parentId.replace('item-',''):null;const initialContent=type==='file'?'Tulis konten di sini.':null;
-const {data,error}=await supabase.from('folder_items').insert({name,type,parent_id:parentUUID,content:initialContent}).select();if(error){alert("Gagal menyimpan!");return;}
-const newItem=data[0];if(parentId){const parent=document.getElementById(parentId);let ul=parent.querySelector('.folder-list');if(!ul){ul=document.createElement('ul');ul.className='folder-list';parent.appendChild(ul);}ul.appendChild(createItemElement(newItem));parent.classList.add('expanded');}else document.getElementById('root-list').appendChild(createItemElement(newItem));}
-window.editItemName=function(id){const li=document.getElementById(id);const nameSpan=li.querySelector('.item-name');const header=li.querySelector('.item-header');const old=nameSpan.textContent.trim();const input=document.createElement('input');input.className='item-edit-input';input.value=old;input.style.flexGrow='1';nameSpan.style.display='none';header.insertBefore(input,nameSpan);input.focus();const save=async(v)=>{if(v&&v.trim()!==old){const itemUUID=id.replace('item-','');await supabase.from('folder_items').update({name:v}).eq('id',itemUUID);}nameSpan.textContent=v||old;input.remove();nameSpan.style.display='block';};input.onblur=()=>save(input.value);input.onkeyup=e=>{if(e.key==='Enter')input.blur();if(e.key==='Escape')save(old);}}
-window.deleteItem=async(id)=>{if(!confirm('Yakin hapus item ini?'))return;const itemUUID=id.replace('item-','');await supabase.from('folder_items').delete().eq('id',itemUUID);const el=document.getElementById(id);if(el)el.remove();}
-window.selectItem=async(id)=>{const li=document.getElementById(id);const isFolder=li.classList.contains('folder');const itemUUID=id.replace('item-','');document.querySelectorAll('.folder-list li').forEach(el=>el.classList.remove('selected'));li.classList.add('selected');selectedItemId=itemUUID;document.getElementById('content-type').textContent=isFolder?'Folder':'File';const editor=document.getElementById('file-editor');if(!isFolder){editor.textContent='Memuat konten...';const {data,error}=await supabase.from('folder_items').select('content').eq('id',itemUUID).single();editor.textContent=data?.content||'';}else editor.textContent='(Folder ini tidak memiliki konten yang bisa diedit.)';}
-window.saveFileContent=async()=>{const selected=document.querySelector('.folder-list li.selected');const editor=document.getElementById('file-editor');const status=document.getElementById('save-status');if(!selected||selected.classList.contains('folder'))return alert("Pilih file dahulu.");status.textContent='Menyimpan...';const {error}=await supabase.from('folder_items').update({content:editor.textContent}).eq('id',selectedItemId);status.textContent=error?'Gagal!':'Tersimpan!';setTimeout(()=>status.textContent='',2000);}
-document.addEventListener('DOMContentLoaded',fetchAndRenderItems);
+/* ---------- helpers to build DOM items ---------- */
+function createFolderLi(folder){
+  const li = document.createElement('li');
+  li.className = 'folder-li';
+  li.dataset.id = folder.id;
+  li.dataset.type = 'folder';
+
+  // left: clickable folder button
+  const btn = document.createElement('div');
+  btn.className = 'folder-button';
+  btn.innerHTML = `<span class="toggle">▶</span><span class="name">${escapeHtml(folder.name)}</span>`;
+  btn.onclick = (e)=> { e.stopPropagation(); toggleFolder(btn, folder.id); };
+
+  // right: floating menu trigger (•••)
+  const controls = document.createElement('div');
+  controls.className = 'item-controls';
+  const dot = document.createElement('button');
+  dot.className = 'dot-btn';
+  dot.innerText = '•••';
+  dot.onclick = (ev)=> { ev.stopPropagation(); showFloatingMenu(folder.id, 'folder', li); };
+  controls.appendChild(dot);
+
+  li.appendChild(btn);
+  li.appendChild(controls);
+
+  // child container (collapsed by default)
+  const ul = document.createElement('ul');
+  ul.className = 'folder-list hidden';
+  ul.dataset.loaded = ''; // empty => not loaded
+  li.appendChild(ul);
+
+  return li;
+}
+
+function createFileLi(file){
+  const li = document.createElement('li');
+  li.className = 'file-item';
+  li.dataset.id = file.id;
+  li.dataset.type = 'file';
+
+  // left: file name clickable
+  const nameDiv = document.createElement('div');
+  nameDiv.style.flex = '1';
+  nameDiv.textContent = `📄 ${file.name}`;
+  nameDiv.onclick = (e)=> { e.stopPropagation(); openFile(file); };
+
+  // right: dot menu
+  const controls = document.createElement('div');
+  controls.className = 'item-controls';
+  const dot = document.createElement('button');
+  dot.className = 'dot-btn';
+  dot.innerText = '•••';
+  dot.onclick = (ev)=> { ev.stopPropagation(); showFloatingMenu(file.id, 'file', li); };
+  controls.appendChild(dot);
+
+  li.appendChild(nameDiv);
+  li.appendChild(controls);
+
+  return li;
+}
+
+/* ---------- escape helper ---------- */
+function escapeHtml(str){
+  if(!str) return '';
+  return String(str).replace(/[&<>"']/g, s=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[s]);
+}
+
+/* ---------- render root list ---------- */
+async function loadRootFolders(){
+  const root = document.getElementById('folderTree');
+  root.innerHTML = 'Memuat...';
+  const { data, error } = await supabase.from('folder_items')
+    .select('*')
+    .is('parent_id', null)
+    .eq('type','folder')
+    .order('name', { ascending: true });
+
+  if(error){ root.innerHTML = '<li style="color:#ff5c5c">Gagal memuat</li>'; console.error(error); return; }
+  root.innerHTML = '';
+  data.forEach(f=> root.appendChild(createFolderLi(f)));
+}
+
+/* ---------- toggle folder (lazy load + collapse) ---------- */
+async function toggleFolder(btnEl, folderId){
+  const li = btnEl.parentElement;
+  const ul = li.querySelector('ul.folder-list');
+  const icon = btnEl.querySelector('.toggle');
+
+  // if open -> close
+  if(!ul.classList.contains('hidden')){
+    ul.classList.add('hidden');
+    icon.textContent = '▶';
+    return;
+  }
+
+  // open
+  icon.textContent = '▼';
+  ul.classList.remove('hidden');
+
+  // if already loaded before, do not fetch again
+  if(ul.dataset.loaded === 'true') return;
+
+  // show loading
+  ul.innerHTML = '<li style="opacity:.6;padding:6px 8px;">Memuat...</li>';
+
+  // fetch children (both folders and files)
+  const { data, error } = await supabase.from('folder_items')
+    .select('*')
+    .eq('parent_id', folderId)
+    .order('type', { ascending: false }) /* folders first? we'll sort below */
+
+  if(error){ ul.innerHTML = '<li style="color:#ff7777;padding:6px 8px;">Gagal memuat</li>'; console.error(error); return; }
+
+  // separate folders and files and sort by name
+  const folders = data.filter(i=>i.type==='folder').sort((a,b)=>a.name.localeCompare(b.name));
+  const files = data.filter(i=>i.type==='file').sort((a,b)=>a.name.localeCompare(b.name));
+
+  ul.innerHTML = '';
+  if(folders.length===0 && files.length===0){
+    ul.innerHTML = '<li style="opacity:.6;padding:6px 8px;">(Kosong)</li>';
+  } else {
+    folders.forEach(f=> ul.appendChild(createFolderLi(f)));
+    files.forEach(f=> ul.appendChild(createFileLi(f)));
+  }
+  ul.dataset.loaded = 'true';
+}
+
+/* ---------- open file to editor (right panel) ---------- */
+async function openFile(file){
+  document.getElementById('content-title').textContent = `File: ${file.name}`;
+  document.getElementById('content-type').textContent = 'File';
+  const editor = document.getElementById('fileEditor');
+  editor.textContent = 'Memuat...';
+  const { data, error } = await supabase.from('folder_items').select('content').eq('id', file.id).single();
+  if(error){ editor.textContent = '(Gagal memuat)'; console.error(error); return; }
+  editor.textContent = data?.content ?? '';
+  selectedFileId = file.id;
+}
+
+/* ---------- save editor content ---------- */
+document.getElementById('saveBtn').addEventListener('click', async ()=>{
+  const status = document.getElementById('saveStatus');
+  const editor = document.getElementById('fileEditor');
+  if(!selectedFileId){ alert('Pilih file dulu.'); return; }
+  status.textContent = 'Menyimpan...';
+  const { error } = await supabase.from('folder_items').update({ content: editor.textContent }).eq('id', selectedFileId);
+  status.textContent = error ? '❌ Gagal' : '✅ Tersimpan';
+  setTimeout(()=> status.textContent = '', 1800);
+});
+
+/* ---------- floating menu UI ---------- */
+const floatingMenu = document.getElementById('floatingMenu');
+
+function buildMenuFor(target){
+  // target: { id, type, domEl }
+  const t = target;
+  floatingMenu.innerHTML = ''; // clear
+
+  // helper to create menu button
+  const mkBtn = (label, emoji, onclick)=> {
+    const b = document.createElement('button');
+    b.innerHTML = `<span>${emoji}</span><span>${label}</span>`;
+    b.onclick = async (e)=>{ e.stopPropagation(); hideMenu(); await onclick(); };
+    return b;
+  };
+
+  if(t.type === 'folder'){
+    floatingMenu.appendChild(mkBtn('Tambah Folder di sini', '📁', async ()=> addChild(t.id, 'folder')));
+    floatingMenu.appendChild(mkBtn('Tambah File di sini', '📄', async ()=> addChild(t.id, 'file')));
+    floatingMenu.appendChild(document.createElement('div')).className='sep';
+    floatingMenu.appendChild(mkBtn('Ubah Nama Folder', '✏️', async ()=> renameItem(t.id)));
+    floatingMenu.appendChild(mkBtn('Hapus Folder (dan isinya)', '🗑️', async ()=> deleteItem(t.id, 'folder')));
+  } else {
+    floatingMenu.appendChild(mkBtn('Ubah Nama File', '✏️', async ()=> renameItem(t.id)));
+    floatingMenu.appendChild(mkBtn('Hapus File', '🗑️', async ()=> deleteItem(t.id, 'file')));
+  }
+}
+
+/* show floating menu (floating to right, animated) */
+function showFloatingMenu(id, type, domEl){
+  currentMenuTarget = { id, type, domEl };
+  buildMenuFor(currentMenuTarget);
+  floatingMenu.classList.add('show');
+  floatingMenu.setAttribute('aria-hidden','false');
+}
+
+/* hide */
+function hideMenu(){
+  floatingMenu.classList.remove('show');
+  floatingMenu.setAttribute('aria-hidden','true');
+  currentMenuTarget = null;
+}
+
+/* hide when clicking outside */
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('.floating-menu') && !e.target.closest('.dot-btn')) {
+    hideMenu();
+  }
+});
+
+/* ---------- CRUD actions ---------- */
+
+/* add child (folder or file) under parentId */
+async function addChild(parentId, type){
+  const name = prompt(`Nama ${type==='folder'?'Folder':'File'} baru:`,'baru');
+  if(!name) return;
+  const initial = type==='file' ? 'Tulis isi file...' : null;
+  const { data, error } = await supabase.from('folder_items').insert({
+    name: name.trim(),
+    type,
+    parent_id: parentId,
+    content: initial
+  }).select().single();
+
+  if(error){ alert('Gagal menambah: '+error.message); console.error(error); return; }
+
+  // refresh the parent UL: find parent li and reset dataset.loaded so toggleFolder will reload
+  const parentLi = document.querySelector(`li.folder-li[data-id="${parentId}"]`);
+  if(parentLi){
+    const ul = parentLi.querySelector('ul.folder-list');
+    if(ul){
+      ul.dataset.loaded = ''; // mark not loaded
+      // if currently open, collapse then re-open to refresh
+      const btn = parentLi.querySelector('.folder-button');
+      if(ul.classList.contains('hidden')){
+        // closed: leave closed (no immediate UI change)
+      } else {
+        // open: force reload
+        // close then open to re-fetch (gives visual refresh)
+        ul.classList.add('hidden');
+        btn.querySelector('.toggle').textContent = '▶';
+        // tiny delay for UX, then re-open (and thus reload)
+        setTimeout(()=> toggleFolder(btn, parentId), 120);
+      }
+    }
+  } else {
+    // if parent is root null, reload root list
+    await loadRootFolders();
+  }
+}
+
+/* rename item (folder or file) */
+async function renameItem(id){
+  // fetch existing name
+  const { data, error } = await supabase.from('folder_items').select('name,type').eq('id', id).single();
+  if(error){ alert('Gagal mengambil item.'); console.error(error); return; }
+  const newName = prompt('Nama baru:', data.name);
+  if(!newName || newName.trim()===data.name) return;
+  const { error: err2 } = await supabase.from('folder_items').update({ name: newName.trim() }).eq('id', id);
+  if(err2){ alert('Gagal mengubah nama'); console.error(err2); return; }
+
+  // update DOM quickly
+  const el = document.querySelector(`[data-id="${id}"]`);
+  if(el){
+    // folder => update .name; file => textContent
+    if(el.classList.contains('folder-li')){
+      const nameSpan = el.querySelector('.name');
+      if(nameSpan) nameSpan.textContent = newName;
+    } else {
+      // file-item
+      el.querySelector('div')?.textContent = `📄 ${newName}`;
+    }
+  }
+}
+
+/* delete item (if folder, cascade in DB by FK) */
+async function deleteItem(id, typeOverride){
+  if(!confirm('Yakin akan menghapus?')) return;
+  const { error } = await supabase.from('folder_items').delete().eq('id', id);
+  if(error){ alert('Gagal hapus'); console.error(error); return; }
+
+  // remove from DOM
+  const el = document.querySelector(`[data-id="${id}"]`);
+  if(el){
+    const parentUl = el.parentElement;
+    el.remove();
+    // if parent becomes empty, show (Kosong)
+    if(parentUl && parentUl.classList.contains('folder-list') && parentUl.children.length === 0){
+      parentUl.innerHTML = '<li style="opacity:.6;padding:6px 8px">(Kosong)</li>';
+    }
+  }
+
+  // if deleted item was currently selected file, clear editor
+  if(selectedFileId === id){
+    selectedFileId = null;
+    document.getElementById('fileEditor').textContent = '(Pilih file lain)';
+    document.getElementById('content-title').textContent = 'Pilih file';
+    document.getElementById('content-type').textContent = '';
+  }
+}
+
+/* ---------- add root folder & file ---------- */
+document.getElementById('addRootFolderBtn').addEventListener('click', async ()=>{
+  const name = prompt('Nama folder root baru:','Folder Baru');
+  if(!name) return;
+  const { error } = await supabase.from('folder_items').insert({ name: name.trim(), type: 'folder', parent_id: null }).select();
+  if(error){ alert('Gagal menambah root folder'); console.error(error); return; }
+  await loadRootFolders();
+});
+
+document.getElementById('addRootFileBtn').addEventListener('click', async ()=>{
+  const name = prompt('Nama file root baru:','file_baru.txt');
+  if(!name) return;
+  const { error } = await supabase.from('folder_items').insert({ name: name.trim(), type: 'file', parent_id: null, content: '' }).select();
+  if(error){ alert('Gagal menambah root file'); console.error(error); return; }
+  // place file at root (we don't render files in root by default as tree expects folders, so reload root to reflect)
+  await loadRootFolders();
+});
+
+/* ---------- init ---------- */
+document.addEventListener('DOMContentLoaded', async ()=>{
+  await loadRootFolders();
+});
 </script>
-
 </body>
 </html>
