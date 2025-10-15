@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Explorer Supabase Interaktif | Neon Edition</title>
+    <title>File Explore</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
@@ -366,13 +366,13 @@
 <body>
 
 <div class="header">
-    <span style="margin-right: 10px;">⚡</span> Supabase File Explorer <span style="font-size: 0.7em; margin-left: 10px; color: #a9a9a9;">(Neon Edition)</span>
+    <span style="margin-right: 10px;">⚡</span> File Explorer <span style="font-size: 0.7em; margin-left: 10px; color: #a9a9a9;"></span>
 </div>
 
 <div class="file-explorer">
     
     <div class="sidebar">
-        <h2><span style="font-size: 1.2em;">🗂️</span> Struktur Direktori</h2>
+        <h2><span style="font-size: 1.2em;">🗂️</span> Daftar Folder</h2>
         
         <div class="action-bar">
             <button onclick="addNewItem(null, 'folder'); toggleMenu(null);">➕ Folder</button>
@@ -392,7 +392,6 @@
         <p style="color: var(--subtext);">Tipe: <span id="content-type"></span></p>
         
         <div class="file-content" id="file-editor" contenteditable="false">
-            Silakan tunggu hingga data dimuat. Setelah itu, klik pada file di sidebar kiri.
         </div>
         
         <span id="save-status"></span>
@@ -757,7 +756,7 @@
     };
 
     window.deleteItem = async function(itemId) {
-        if (!confirm('Yakin ingin menghapus item ini dan semua isinya (jika folder)?')) return;
+        if (!confirm('Yakin ingin menghapus item ini dan semua isinya?')) return;
         
         const itemUUID = itemId.replace('item-', '');
         
@@ -851,7 +850,7 @@
             saveStatus.style.color = 'var(--subtext)';
 
         } else {
-            editor.textContent = `--- Ini adalah Folder (${name}). Tidak ada konten yang dapat diedit di sini. ---`;
+            editor.textContent = `Folder Tidak Dapat Ditinjau`;
             downloadButton.style.display = 'none'; 
             saveStatus.textContent = '';
         }
