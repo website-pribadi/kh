@@ -1,276 +1,736 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Explorer Supabase | Neon Edition</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorer Supabase Interaktif | Neon Edition</title>
 
-<style>
-:root {
-  --bg-dark: #0b0e16;
-  --bg-card: #141829;
-  --accent: #00ffc3;
-  --accent2: #7a5cff;
-  --text: #f5f5f5;
-  --border: rgba(255,255,255,0.08);
-}
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        /* --- 1. VARIABEL WARNA NEON DARK --- */
+        :root {
+            --bg-dark: #0b0e16;
+            --bg-card: #141829;
+            --accent: #00ffc3; /* Neon Cyan */
+            --accent2: #7a5cff; /* Neon Purple */
+            --text: #f5f5f5;
+            --subtext: #b0b0b0;
+            --border: rgba(255,255,255,0.08);
+            --hover-color: #1a223f; /* Hover background slightly brighter than card */
+            --select-color: rgba(0, 255, 195, 0.15); /* Selected background */
+            --danger-color: #ff5555;
+            --success-color: #00e6a3;
+            --header-height: 50px;
+        }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: "Poppins", sans-serif;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: linear-gradient(145deg, #090d16, #101628);
-  color: var(--text);
-}
+        /* --- 2. RESET DAN LAYOUT UTAMA (DARK) --- */
+        
+        * { box-sizing:border-box; margin:0; padding:0; }
 
-/* HEADER */
-.header {
-  height: 55px;
-  background: var(--bg-card);
-  color: var(--accent);
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  font-size: 1.2em;
-  font-weight: 600;
-  box-shadow: 0 0 15px rgba(0, 255, 195, 0.2);
-  border-bottom: 1px solid var(--border);
-  text-shadow: 0 0 8px rgba(0,255,195,0.4);
-}
+        body { 
+            font-family:'Poppins', sans-serif;
+            background:linear-gradient(145deg,#090d16,#101628); /* Dark Gradient */
+            color:var(--text); 
+            height: 100vh; 
+            display: flex;
+            flex-direction: column;
+        }
 
-/* AREA UTAMA */
-.file-explorer {
-  display: flex;
-  flex-grow: 1;
-  overflow: hidden;
-}
+        .header {
+            height: var(--header-height);
+            background-color: var(--accent2); /* Neon Purple Header */
+            color: var(--text);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            font-size: 1.2em;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(122, 92, 255, 0.3);
+        }
 
-/* SIDEBAR */
-.sidebar {
-  width: 320px;
-  background: var(--bg-card);
-  border-right: 1px solid var(--border);
-  padding: 15px;
-  overflow-y: auto;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
-}
-.sidebar h2 {
-  margin-bottom: 15px;
-  font-size: 1.1em;
-  font-weight: 600;
-  color: var(--accent2);
-  text-shadow: 0 0 8px rgba(122,92,255,0.4);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 8px;
-}
+        .file-explorer { 
+            display: flex; 
+            flex-grow: 1; 
+        }
 
-.folder-list { list-style: none; padding-left: 10px; transition: all 0.3s; }
-.folder-item {
-  cursor: pointer;
-  padding: 5px 8px;
-  border-radius: 6px;
-  transition: 0.3s;
-}
-.folder-item:hover {
-  background: rgba(255,255,255,0.05);
-}
-.folder-item.selected {
-  background: var(--accent);
-  color: var(--bg-dark);
-  font-weight: 600;
-  box-shadow: 0 0 10px rgba(0,255,195,0.4);
-}
+        /* --- 3. SIDEBAR (EXPLORER TREE) --- */
 
-.folder-item span { margin-left: 6px; }
+        .sidebar { 
+            width: 300px; 
+            background-color: var(--bg-card); /* Dark Card BG */
+            border-right: 1px solid var(--border); 
+            padding: 15px; 
+            overflow-y: auto; 
+            flex-shrink: 0; 
+            display: flex;
+            flex-direction: column;
+        }
 
-.file-item {
-  padding: 4px 12px;
-  margin-left: 25px;
-  cursor: pointer;
-  opacity: 0.85;
-}
-.file-item:hover { color: var(--accent2); }
+        .sidebar h2 {
+            margin: 0 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--accent); /* Neon Cyan Title */
+            text-shadow: 0 0 5px rgba(0,255,195,0.4);
+        }
 
-.toggle {
-  margin-right: 5px;
-  color: var(--accent);
-  cursor: pointer;
-  user-select: none;
-}
+        .action-bar { 
+            margin-bottom: 15px; 
+            display: flex;
+            gap: 8px;
+        }
+        .action-bar button { 
+            background-color: var(--accent); /* Neon Cyan Button */
+            color: var(--bg-dark); /* Dark Text on Button */
+            border: none; 
+            padding: 6px 12px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.2s;
+            box-shadow: 0 0 8px rgba(0,255,195,0.5);
+        }
+        .action-bar button:hover { 
+            background-color: #00e6a3; 
+            box-shadow: 0 0 15px rgba(0,255,195,0.7);
+        }
 
-.hidden { display: none; }
+        /* --- 4. LIST FILE/FOLDER STYLING (DARK) --- */
+        
+        .folder-list { 
+            list-style: none; 
+            padding-left: 0; 
+            margin: 0; 
+            user-select: none;
+        }
+        
+        .folder-list > li > ul.folder-list { 
+            padding-left: 20px; 
+            display: none; 
+        }
+        
+        .folder-list li.expanded > ul.folder-list {
+            display: block; 
+        }
+        
+        .folder-list li {
+            margin: 0; 
+            position: relative;
+        }
 
-.content-panel {
-  flex-grow: 1;
-  padding: 20px;
-  background: var(--bg-dark);
-  overflow-y: auto;
-}
-.content-panel h3 {
-  color: var(--accent);
-  text-shadow: 0 0 8px rgba(0,255,195,0.4);
-}
-.file-content {
-  background: var(--bg-card);
-  color: var(--text);
-  padding: 15px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  min-height: 300px;
-  font-family: "Consolas", monospace;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
-  white-space: pre-wrap;
-}
-.save-area {
-  margin-top: 15px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-.save-area button {
-  background: var(--accent2);
-  color: var(--bg-card);
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  box-shadow: 0 0 12px rgba(122,92,255,0.3);
-  transition: 0.3s;
-}
-.save-area button:hover {
-  background: #9270ff;
-  box-shadow: 0 0 20px rgba(122,92,255,0.4);
-}
-#save-status { color: var(--accent); font-weight: 500; }
+        .item-header {
+            display: flex; 
+            align-items: center;
+            justify-content: space-between; 
+            padding: 5px 8px; 
+            cursor: pointer;
+            border-radius: 3px;
+        }
 
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-thumb { background: var(--accent2); border-radius: 4px; }
-</style>
+        .folder-list li:hover > .item-header { background-color: var(--hover-color); }
+        .folder-list li.selected > .item-header { 
+            background-color: var(--select-color); 
+            font-weight: 500; 
+            border: 1px solid var(--accent); /* Neon border on selection */
+            padding: 4px 7px; /* Adjust padding for border */
+        }
+        
+        /* Ikon Folder/File */
+        .item-header::before { 
+            content: " "; 
+            display: inline-block; 
+            width: 18px; 
+            text-align: center; 
+            margin-right: 6px; 
+            vertical-align: middle; 
+            font-size: 16px; 
+            transition: transform 0.2s;
+        }
+        
+        .folder-list li.file > .item-header::before { content: '📄'; color: var(--subtext); font-size: 14px;}
+        .folder-list li.folder > .item-header::before { content: '📁'; color: var(--accent2); } /* Folder Icon: Neon Purple */
+        .folder-list li.folder.expanded > .item-header::before { content: '📂'; } 
+        
+        .folder-list li.folder > .item-header .item-name::before {
+            content: '▶';
+            font-size: 8px;
+            margin-right: 5px;
+            color: var(--accent); /* Toggle Icon: Neon Cyan */
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+        .folder-list li.folder.expanded > .item-header .item-name::before {
+            content: '▼';
+        }
+        
+        .item-name {
+            flex-grow: 1; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 5px; 
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Style untuk input edit nama */
+        .item-edit-input {
+            flex-grow: 1;
+            padding: 2px 4px;
+            margin-right: -4px; 
+            border: 1px solid var(--accent);
+            border-radius: 3px;
+            font-size: 1em;
+            line-height: 1.2;
+            box-sizing: border-box;
+            background-color: var(--bg-dark);
+            color: var(--text);
+        }
+
+        /* --- KONTROL ELIPSIS (NEON) --- */
+
+        .controls {
+            position: relative;
+            flex-shrink: 0;
+            padding-left: 5px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .folder-list li:hover > .item-header .controls { opacity: 1; } 
+        .controls.active { opacity: 1; } 
+
+        .ellipsis-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--subtext);
+            font-weight: bold;
+            font-size: 1em;
+            padding: 2px 5px;
+            border-radius: 3px;
+            transition: color 0.2s, background-color 0.2s;
+        }
+        .ellipsis-button:hover {
+            background-color: var(--hover-color);
+            color: var(--accent);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%; 
+            right: 10px; 
+            background-color: var(--bg-card);
+            border: 1px solid var(--accent); /* Neon Border */
+            box-shadow: 0 0 15px rgba(0,255,195,0.2);
+            border-radius: 4px;
+            z-index: 1000;
+            min-width: 150px;
+            padding: 5px 0;
+            display: none;
+        }
+
+        .dropdown-menu.visible {
+            display: block;
+        }
+
+        .dropdown-menu button {
+            display: block;
+            width: 100%;
+            padding: 8px 15px;
+            text-align: left;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            color: var(--text);
+            white-space: nowrap;
+        }
+
+        .dropdown-menu button:hover {
+            background-color: var(--hover-color);
+            color: var(--accent);
+        }
+        /* Style khusus untuk tombol Hapus */
+        .dropdown-menu button.delete-btn {
+            color: var(--danger-color);
+        }
+        .dropdown-menu button.delete-btn:hover {
+            background-color: rgba(255, 85, 85, 0.2);
+            color: var(--danger-color);
+        }
+
+        /* --- 5. CONTENT PANEL (EDITOR) --- */
+
+        .content-panel { 
+            flex-grow: 1; 
+            background-color: var(--bg-dark); 
+            padding: 20px; 
+            overflow-y: auto; 
+        }
+
+        .content-panel h3 {
+            color: var(--accent);
+            text-shadow: 0 0 5px rgba(0,255,195,0.4);
+            margin-top: 0;
+            margin-bottom: 5px;
+        }
+
+        .file-content { 
+            white-space: pre-wrap; 
+            background-color: var(--bg-card); 
+            padding: 15px; 
+            border-radius: 5px; 
+            min-height: 200px; 
+            font-family: 'Consolas', 'Courier New', monospace; 
+            font-size: 0.9em; 
+            border: 1px solid var(--border);
+            height: 400px; 
+            overflow: auto; 
+            color: var(--text);
+            transition: border-color 0.3s;
+        }
+        /* Highlight border saat dapat diedit */
+        #file-editor[contenteditable="true"] {
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(0, 255, 195, 0.4);
+        }
+
+        .save-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .save-area button { 
+            background-color: var(--success-color); 
+            color: var(--bg-card); 
+            border: none; 
+            padding: 8px 15px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            transition: all 0.2s;
+            font-weight: 500;
+            box-shadow: 0 0 8px rgba(0, 230, 163, 0.5);
+        }
+        .save-area button:hover { 
+            background-color: #00b37c; 
+            box-shadow: 0 0 15px rgba(0, 230, 163, 0.7);
+        }
+        
+        #save-status {
+            color: var(--success-color);
+            font-weight: 500;
+            text-shadow: 0 0 5px rgba(0, 230, 163, 0.5);
+        }
+    </style>
 </head>
 <body>
 
-<div class="header">☁️ Supabase Explorer Neon</div>
+<div class="header">
+    <span style="margin-right: 10px;">⚡</span> Supabase File Explorer <span style="font-size: 0.7em; margin-left: 10px; color: #a9a9a9;">(Neon Edition)</span>
+</div>
 
 <div class="file-explorer">
-  <div class="sidebar">
-    <h2>🗂️ Struktur Folder</h2>
-    <ul class="folder-list" id="folderTree">Memuat data...</ul>
-  </div>
+    
+    <div class="sidebar">
+        <h2><span style="font-size: 1.2em;">🗂️</span> Struktur Direktori</h2>
+        
+        <div class="action-bar">
+            <button onclick="addNewItem(null, 'folder'); toggleMenu(null);">➕ Folder</button>
+            <button onclick="addNewItem(null, 'file'); toggleMenu(null);">➕ File</button>
+        </div>
 
-  <div class="content-panel">
-    <h3 id="content-title">Pilih File</h3>
-    <p>Tipe: <span id="content-type"></span></p>
-    <div class="file-content" id="file-editor" contenteditable="false">(Isi file akan tampil di sini)</div>
-    <div class="save-area">
-      <button onclick="saveFileContent()">💾 Simpan</button>
-      <span id="save-status"></span>
+        <ul class="folder-list" id="root-list">
+            <li style="text-align: center;">Memuat data...</li>
+        </ul>
     </div>
-  </div>
+    
+    <div class="content-panel">
+        <h3 id="content-title">Pilih File untuk Melihat Konten</h3>
+        <p style="color: var(--subtext);">Tipe: <span id="content-type"></span></p>
+        
+        <div class="file-content" id="file-editor" contenteditable="false">
+            Silakan tunggu hingga data dimuat. Setelah itu, klik pada file di sidebar kiri.
+        </div>
+        
+        <div class="save-area">
+            <button onclick="saveFileContent()">💾 Simpan Perubahan</button>
+            <span id="save-status"></span>
+        </div>
+    </div>
+
 </div>
 
 <script>
-const SUPABASE_URL = 'https://zawtfjszvkuudawrilqg.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inphd3RmanN6dmt1dWRhd3JpbHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0MTk2NzMsImV4cCI6MjA3NDk5NTY3M30.CGYz4-QnYb3Hu9p3fV0XoG5J8oicqZsji-YJf2UItQ8';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // ----------------------------------------------------------------------
+    // --- 1. INISIALISASI SUPABASE & GLOBAL STATE ---
+    // ----------------------------------------------------------------------
+    
+    const SUPABASE_URL = 'https://zawtfjszvkuudawrilqg.supabase.co'; 
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inphd3RmanN6dmt1dWRhd3JpbHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk0MTk2NzMsImV4cCI6MjA3NDk5NTY3M30.CGYz4-QnYb3Hu9p3fV0XoG5J8oicqZsji-YJf2UItQ8';
 
-let selectedFileId = null;
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    let itemCounter = 1; 
+    let selectedItemId = null; 
+    let allItemsData = []; // Menyimpan semua data untuk menghindari fetch berulang
+    
 
-// 🔹 Load root folder
-async function loadRootFolders() {
-  const list = document.getElementById('folderTree');
-  list.innerHTML = 'Memuat...';
-  const { data, error } = await supabase.from('folder_items').select('*').is('parent_id', null).eq('type', 'folder');
-  if (error) return list.innerHTML = 'Gagal memuat data.';
-  list.innerHTML = '';
-  data.forEach(folder => list.appendChild(createFolder(folder)));
-}
+    // ----------------------------------------------------------------------
+    // --- 2. FUNGSI RENDER DAN STRUKTUR (MODIFIKASI: KONTROL ELIPSIS) ---
+    // ----------------------------------------------------------------------
 
-// 🔹 Folder element
-function createFolder(folder) {
-  const li = document.createElement('li');
-  li.innerHTML = `
-    <div class="folder-item" onclick="toggleFolder(this,'${folder.id}')">
-      <span class="toggle">▶</span>📁 ${folder.name}
-    </div>
-    <ul class="folder-list hidden"></ul>
-  `;
-  return li;
-}
+    function createItemElement(itemData) {
+        const itemId = `item-${itemData.id}`;
+        const itemClass = itemData.type === 'folder' ? 'folder' : `file`; 
+        const li = document.createElement('li');
+        li.className = itemClass;
+        li.id = itemId;
+        const isFolder = itemData.type === 'folder';
 
-// 🔹 Toggle folder open/close
-async function toggleFolder(el, id) {
-  const ul = el.nextElementSibling;
-  const icon = el.querySelector('.toggle');
+        // Konten menu dropdown
+        const folderActions = isFolder 
+            ? `
+                <button onclick="addNewItem('${itemId}', 'folder'); toggleMenu('${itemId}');">➕ Tambah Folder</button>
+                <button onclick="addNewItem('${itemId}', 'file'); toggleMenu('${itemId}');">➕ Tambah File</button>
+                <hr style="border: none; border-top: 1px solid var(--border); margin: 5px 0;">
+              `
+            : '';
 
-  // jika sedang terbuka → tutup
-  if (!ul.classList.contains('hidden')) {
-    ul.classList.add('hidden');
-    icon.textContent = '▶';
-    return;
-  }
-
-  // jika belum pernah dimuat, ambil data dari Supabase
-  if (!ul.dataset.loaded) {
-    ul.innerHTML = '<li style="opacity:0.6;">Memuat...</li>';
-    const { data, error } = await supabase.from('folder_items').select('*').eq('parent_id', id);
-    if (error) {
-      ul.innerHTML = '<li style="color:red;">Gagal memuat isi</li>';
-      return;
+        li.innerHTML = `
+            <div class="item-header" onclick="selectItem('${itemId}')">
+                <span class="item-name">${itemData.name}</span>
+                <div class="controls" id="controls-${itemId}">
+                    <button class="ellipsis-button" onclick="event.stopPropagation(); toggleMenu('${itemId}')">•••</button>
+                    <div class="dropdown-menu" id="menu-${itemId}">
+                        ${folderActions}
+                        <button onclick="editItemName('${itemId}'); toggleMenu('${itemId}');">✏️ Edit Nama</button>
+                        <button class="delete-btn" onclick="deleteItem('${itemId}'); toggleMenu('${itemId}');">🗑️ Hapus</button>
+                    </div>
+                </div>
+            </div>
+            ${isFolder ? '<ul class="folder-list"></ul>' : ''}
+        `;
+        return li;
     }
-    ul.innerHTML = '';
-    if (data.length === 0) {
-      ul.innerHTML = '<li style="opacity:0.6;">(Kosong)</li>';
-    } else {
-      data.forEach(item => {
-        if (item.type === 'folder') ul.appendChild(createFolder(item));
-        else ul.appendChild(createFile(item));
-      });
+
+    function buildTree(items) {
+        const rootItems = [];
+        const itemsMap = {};
+        items.forEach(item => { 
+             // Convert UUIDs to strings for consistent key access
+             const idStr = item.id.toString(); 
+             const parentIdStr = item.parent_id ? item.parent_id.toString() : null;
+             itemsMap[idStr] = {...item, id: idStr, parent_id: parentIdStr, children: []}; 
+        });
+        
+        Object.values(itemsMap).forEach(item => {
+            if (item.parent_id === null) {
+                rootItems.push(item);
+            } else if (itemsMap[item.parent_id]) {
+                itemsMap[item.parent_id].children.push(item);
+            }
+        });
+        return rootItems;
     }
-    ul.dataset.loaded = 'true';
-  }
 
-  // tampilkan isi (expand)
-  ul.classList.remove('hidden');
-  icon.textContent = '▼';
-}
+    function renderTree(items, ulElement) {
+        // Sort: Folders first, then alphabetically
+        items.sort((a, b) => (b.type === 'folder') - (a.type === 'folder') || a.name.localeCompare(b.name));
+        
+        items.forEach(item => {
+            const li = createItemElement(item);
+            ulElement.appendChild(li);
+            
+            if (item.type === 'folder' && item.children.length > 0) {
+                const newUl = document.createElement('ul');
+                newUl.className = 'folder-list';
+                li.appendChild(newUl);
+                renderTree(item.children, newUl);
+            }
+        });
+    }
 
-// 🔹 File element
-function createFile(file) {
-  const li = document.createElement('li');
-  li.className = 'file-item';
-  li.textContent = `📄 ${file.name}`;
-  li.onclick = () => openFile(file);
-  return li;
-}
+    /**
+     * FUNGSI UTAMA BARU: Mengelola tampilan/penyembunyian menu elipsis
+     */
+    window.toggleMenu = function(itemId) {
+        const menu = itemId ? document.getElementById(`menu-${itemId}`) : null;
+        
+        // 1. Sembunyikan semua menu yang sedang terbuka
+        document.querySelectorAll('.dropdown-menu.visible').forEach(openMenu => {
+            if (!itemId || openMenu.id !== `menu-${itemId}`) {
+                openMenu.classList.remove('visible');
+                openMenu.parentNode.classList.remove('active');
+            }
+        });
 
-// 🔹 Buka file ke kanan
-async function openFile(file) {
-  document.getElementById('content-title').textContent = `File: ${file.name}`;
-  document.getElementById('content-type').textContent = 'File';
-  const editor = document.getElementById('file-editor');
-  editor.textContent = 'Memuat...';
-  const { data, error } = await supabase.from('folder_items').select('content').eq('id', file.id).single();
-  editor.textContent = data?.content || '(Kosong)';
-  selectedFileId = file.id;
-}
+        // 2. Toggle menu yang diklik (jika ada itemID)
+        if (menu) {
+            const controls = document.getElementById(`controls-${itemId}`);
+            menu.classList.toggle('visible');
+            controls.classList.toggle('active');
+        }
+    };
 
-// 🔹 Simpan isi file
-async function saveFileContent() {
-  const editor = document.getElementById('file-editor');
-  const status = document.getElementById('save-status');
-  if (!selectedFileId) return alert('Pilih file dulu.');
-  status.textContent = 'Menyimpan...';
-  const { error } = await supabase.from('folder_items').update({ content: editor.textContent }).eq('id', selectedFileId);
-  status.textContent = error ? '❌ Gagal' : '✅ Tersimpan';
-  setTimeout(() => status.textContent = '', 2000);
-}
+    /**
+     * MENUTUP MENU JIKA KLIK DI LUAR
+     */
+    document.addEventListener('click', function(event) {
+        let isInsideMenu = event.target.closest('.dropdown-menu, .ellipsis-button');
+        if (!isInsideMenu) {
+            toggleMenu(null);
+        }
+    });
 
-document.addEventListener('DOMContentLoaded', loadRootFolders);
+
+    // ----------------------------------------------------------------------
+    // --- 3. FUNGSI CRUD & LOGIC UTAMA ---
+    // ----------------------------------------------------------------------
+
+    window.fetchAndRenderItems = async function() {
+        const rootList = document.getElementById('root-list');
+        rootList.innerHTML = '<li style="text-align: center;">Memuat data...</li>';
+
+        const { data, error } = await supabase
+            .from('folder_items')
+            .select('*'); 
+
+        if (error) {
+            console.error("Gagal mengambil data:", error);
+            rootList.innerHTML = `<li style="color: var(--danger-color);">ERROR: Gagal memuat data. Periksa kunci Supabase, tabel 'folder_items', dan RLS.</li>`;
+            return;
+        }
+
+        allItemsData = data; // Cache data
+        rootList.innerHTML = '';
+        const tree = buildTree(data);
+        renderTree(tree, rootList);
+    }
+    
+    window.addNewItem = async function(parentId, type) {
+        let name;
+        const counter = itemCounter++; 
+        const initialContent = (type === 'file') ? `Tulis konten file baru di sini.` : null;
+
+        if (type === 'folder') {
+            name = `Folder Baru ${counter}`;
+        } else {
+            name = `file_baru_${counter}.txt`;
+        }
+        
+        const parentUUID = parentId ? parentId.replace('item-', '') : null;
+        
+        // Memaksa insert baru, kemudian fetch ulang (lebih mudah untuk mempertahankan struktur tree)
+        const { error } = await supabase
+            .from('folder_items')
+            .insert({ name: name, type: type, parent_id: parentUUID, content: initialContent }); 
+
+        if (error) { 
+            console.error("Gagal menyimpan ke Supabase:", error); 
+            alert(`Gagal menyimpan! Nama: ${name}. Error: ${error.message}`); 
+            return; 
+        }
+        
+        await fetchAndRenderItems(); // Fetch ulang seluruh tree
+        
+        // Otomatis expand folder induk setelah fetch ulang
+        if (parentId) {
+            const parentElement = document.getElementById(parentId);
+            if(parentElement) parentElement.classList.add('expanded');
+        }
+    };
+    
+    window.editItemName = function(itemId) {
+        const item = document.getElementById(itemId);
+        const header = item.querySelector('.item-header');
+        const nameSpan = item.querySelector('.item-name');
+        
+        if (item.querySelector('.item-edit-input')) return; 
+        
+        const currentName = nameSpan.textContent.trim();
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'item-edit-input';
+        input.value = currentName;
+        input.style.display = 'block'; 
+
+        nameSpan.style.display = 'none';
+        header.insertBefore(input, nameSpan);
+        
+        input.focus();
+        input.select(); 
+
+        const saveNewName = async (newName) => {
+            if (newName && newName.trim() !== currentName) {
+                const itemUUID = itemId.replace('item-', '');
+                
+                const { error } = await supabase
+                    .from('folder_items')
+                    .update({ name: newName.trim() })
+                    .eq('id', itemUUID);
+
+                if (error) { 
+                    console.error("Gagal mengupdate:", error); 
+                    alert("Gagal mengupdate nama!"); 
+                    newName = currentName; 
+                }
+                
+                nameSpan.textContent = newName.trim();
+                
+            }
+            input.remove();
+            nameSpan.style.display = 'block'; 
+            fetchAndRenderItems(); // Fetch ulang untuk memastikan urutan dipertahankan
+        };
+
+        input.onblur = () => {
+            saveNewName(input.value);
+        };
+
+        input.onkeyup = (e) => {
+            if (e.key === 'Enter') {
+                input.blur(); 
+            } else if (e.key === 'Escape') {
+                saveNewName(currentName); 
+            }
+        };
+    };
+
+    window.deleteItem = async function(itemId) {
+        if (!confirm('Yakin ingin menghapus item ini dan semua isinya (jika folder)?')) return;
+        
+        const itemUUID = itemId.replace('item-', '');
+        
+        // Dalam Supabase, menghapus item induk tidak otomatis menghapus anak, 
+        // tapi kita bisa andalkan RLS atau function di backend.
+        // Di sini kita hanya menghapus item yang dipilih.
+        const { error } = await supabase
+            .from('folder_items')
+            .delete()
+            .eq('id', itemUUID);
+
+        if (error) { 
+            console.error("Gagal menghapus:", error); 
+            alert(`Gagal menghapus! Error: ${error.message}`); 
+            return; 
+        }
+        
+        if (selectedItemId === itemUUID) {
+             // Reset content panel jika item yang sedang dibuka dihapus
+             document.getElementById('content-title').textContent = 'Pilih File untuk Melihat Konten';
+             document.getElementById('content-type').textContent = '';
+             document.getElementById('file-editor').textContent = 'Silakan pilih file baru.';
+             document.getElementById('file-editor').contentEditable = 'false';
+             selectedItemId = null;
+        }
+
+        fetchAndRenderItems(); // Fetch ulang untuk memastikan tree akurat
+    };
+    
+    window.selectItem = async function(itemId) {
+        const item = document.getElementById(itemId);
+        const isFolder = item.classList.contains('folder');
+        const itemUUID = itemId.replace('item-', '');
+        const editor = document.getElementById('file-editor');
+        
+        let name = item.querySelector('.item-header .item-name').textContent.trim();
+        
+        // 1. Toggle Folder
+        if (isFolder) {
+            // Hanya toggle jika yang diklik BUKAN tombol elipsis
+            if (!event.target.closest('.controls')) {
+                 item.classList.toggle('expanded'); 
+            }
+            // Karena fungsi selectItem dipanggil dari item-header, kita perlu memastikan tidak ada menu elipsis yang terbuka
+            toggleMenu(null);
+        }
+
+        // 2. Seleksi
+        document.querySelectorAll('.folder-list li').forEach(li => li.classList.remove('selected'));
+        item.classList.add('selected');
+        
+        selectedItemId = itemUUID;
+        document.getElementById('save-status').textContent = '';
+        document.getElementById('content-title').textContent = name;
+        document.getElementById('content-type').textContent = isFolder ? 'Folder' : 'File';
+        editor.contentEditable = isFolder ? 'false' : 'true';
+
+        // 3. Ambil Konten (Hanya untuk File)
+        if (!isFolder) {
+            editor.textContent = "Memuat konten...";
+            
+            // Cari data di cache allItemsData
+            const itemData = allItemsData.find(i => i.id.toString() === itemUUID);
+
+            if (itemData) {
+                editor.textContent = itemData.content || ''; 
+            } else {
+                 // Fallback fetch jika tidak ada di cache
+                 const { data, error } = await supabase
+                    .from('folder_items')
+                    .select('content')
+                    .eq('id', itemUUID)
+                    .single();
+
+                if (error) {
+                    editor.textContent = `Gagal memuat konten: ${error.message}`;
+                    console.error("Error loading content:", error);
+                } else if (data) {
+                    editor.textContent = data.content || ''; 
+                }
+            }
+            
+        } else {
+            editor.textContent = `--- Ini adalah Folder (${name}). Tidak ada konten yang dapat diedit di sini. ---`;
+        }
+    };
+    
+    window.saveFileContent = async function() {
+        const selected = document.querySelector('.folder-list li.selected');
+        const editor = document.getElementById('file-editor');
+        const saveStatus = document.getElementById('save-status');
+        
+        if (!selected || selected.classList.contains('folder')) {
+            alert("Pilih file yang dapat diedit terlebih dahulu.");
+            return;
+        }
+
+        saveStatus.textContent = 'Menyimpan...';
+        saveStatus.style.color = '#fff'; // Temporary white color
+        const itemUUID = selectedItemId;
+        const newContent = editor.textContent;
+
+        const { error } = await supabase
+            .from('folder_items')
+            .update({ content: newContent })
+            .eq('id', itemUUID);
+
+        if (error) {
+            saveStatus.textContent = `Gagal menyimpan: ${error.message}`;
+            saveStatus.style.color = 'var(--danger-color)';
+            console.error("Error saving content:", error);
+        } else {
+            // Update cache saat berhasil
+            const cachedItem = allItemsData.find(i => i.id.toString() === itemUUID);
+            if(cachedItem) cachedItem.content = newContent;
+
+            saveStatus.textContent = 'Tersimpan!';
+            saveStatus.style.color = 'var(--success-color)';
+            setTimeout(() => { saveStatus.textContent = ''; }, 3000);
+        }
+    }
+
+
+    document.addEventListener('DOMContentLoaded', fetchAndRenderItems);
 </script>
+
 </body>
 </html>
-
