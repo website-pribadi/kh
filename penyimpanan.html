@@ -139,7 +139,7 @@
             padding: 4px 7px; /* Adjust padding for border */
         }
         
-        /* Ikon Folder/File */
+        /* Ikon Folder/File - BASE STYLE */
         .item-header::before { 
             content: " "; 
             display: inline-block; 
@@ -151,9 +151,19 @@
             transition: transform 0.2s;
         }
         
-        .folder-list li.file > .item-header::before { content: '📄'; color: var(--subtext); font-size: 14px;}
-        .folder-list li.folder > .item-header::before { content: '📁'; color: var(--accent2); } /* Folder Icon: Neon Purple */
-        .folder-list li.folder.expanded > .item-header::before { content: '📂'; } 
+        /* Default Icons */
+        .folder-list li.file > .item-header::before { 
+            content: attr(data-icon); 
+            color: var(--subtext); 
+            font-size: 14px;
+        }
+        .folder-list li.folder > .item-header::before { 
+            content: '📁'; 
+            color: var(--accent2); 
+        } 
+        .folder-list li.folder.expanded > .item-header::before { 
+            content: '📂'; 
+        } 
         
         .folder-list li.folder > .item-header .item-name::before {
             content: '▶';
@@ -271,15 +281,48 @@
             background-color: var(--bg-dark); 
             padding: 20px; 
             overflow-y: auto; 
+            position: relative; 
+        }
+        
+        /* Kontainer untuk judul dan tombol unduh */
+        .content-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 5px;
         }
 
         .content-panel h3 {
             color: var(--accent);
             text-shadow: 0 0 5px rgba(0,255,195,0.4);
-            margin-top: 0;
-            margin-bottom: 5px;
+            margin: 0; 
+            flex-shrink: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
-
+        
+        /* Tombol Unduh */
+        #download-button {
+            background-color: var(--accent2); 
+            color: var(--text); 
+            border: none; 
+            padding: 5px 10px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.2s;
+            box-shadow: 0 0 8px rgba(122, 92, 255, 0.5);
+            margin-left: 15px;
+            flex-shrink: 0;
+            display: none; 
+        }
+        #download-button:hover { 
+            background-color: #6a49e0; 
+            box-shadow: 0 0 15px rgba(122, 92, 255, 0.7);
+        }
+        
         .file-content { 
             white-space: pre-wrap; 
             background-color: var(--bg-card); 
@@ -294,19 +337,18 @@
             color: var(--text);
             transition: border-color 0.3s;
         }
-        /* Highlight border saat dapat diedit */
+        
         #file-editor[contenteditable="true"] {
             border-color: var(--accent);
             box-shadow: 0 0 10px rgba(0, 255, 195, 0.4);
         }
 
-        /* SEMBUNYIKAN SAVE AREA */
         .save-area {
             display: flex;
             align-items: center;
             gap: 15px;
             margin-top: 15px;
-            visibility: hidden; /* Sembunyikan tombol simpan */
+            visibility: hidden; 
             height: 0;
         }
         
@@ -314,8 +356,10 @@
             color: var(--success-color);
             font-weight: 500;
             text-shadow: 0 0 5px rgba(0, 230, 163, 0.5);
-            visibility: visible; /* Tetap tampilkan status */
+            visibility: visible; 
             height: auto;
+            margin-top: 5px; 
+            display: block;
         }
     </style>
 </head>
@@ -341,16 +385,20 @@
     </div>
     
     <div class="content-panel">
-        <h3 id="content-title">Pilih File untuk Melihat Konten</h3>
+        <div class="content-header-row">
+             <h3 id="content-title">Pilih File untuk Melihat Konten</h3>
+             <button id="download-button" onclick="downloadFileContent()"><span style="margin-right: 5px;">⬇️</span> Unduh</button>
+        </div>
         <p style="color: var(--subtext);">Tipe: <span id="content-type"></span></p>
         
         <div class="file-content" id="file-editor" contenteditable="false">
             Silakan tunggu hingga data dimuat. Setelah itu, klik pada file di sidebar kiri.
         </div>
         
+        <span id="save-status"></span>
+        
         <div class="save-area">
             <button style="display:none;">Tombol Simpan Disembunyikan</button>
-            <span id="save-status"></span>
         </div>
     </div>
 
@@ -368,20 +416,60 @@
     
     let itemCounter = 1; 
     let selectedItemId = null; 
+    let selectedItemName = null; 
     let allItemsData = []; 
 
-    // Variabel untuk menahan listener agar bisa dilepas
     let autosaveListener = null;
 
     // ----------------------------------------------------------------------
-    // --- 2. DEBOUNCE UTILITY (PENTING UNTUK AUTOSAVE) ---
+    // --- 2. FUNGSI UTILITY BARU (ICON & DEBOUNCE) ---
     // ----------------------------------------------------------------------
 
     /**
-     * Fungsi Debounce untuk membatasi frekuensi pemanggilan fungsi
-     * @param {function} func - Fungsi yang akan dipanggil
-     * @param {number} delay - Jeda waktu (ms)
+     * Mendapatkan ikon emoji berdasarkan ekstensi file
+     * CATATAN: Ikon Gambar, Audio, dan Video telah dihapus/diganti dengan '📄'.
+     * @param {string} filename - Nama file.
+     * @returns {string} Emoji yang sesuai.
      */
+    function getFileIcon(filename) {
+        const ext = filename.split('.').pop().toLowerCase();
+        
+        switch (ext) {
+            case 'js':
+            case 'ts':
+            case 'mjs':
+                return '📜'; // Script/JS
+            case 'html':
+            case 'htm':
+                return '🌐'; // Web/HTML
+            case 'css':
+                return '🎨'; // Style/CSS
+            case 'json':
+            case 'yaml':
+            case 'yml':
+                return '⚙️'; // Config/Data
+            case 'md':
+            case 'markdown':
+                return '📝'; // Markdown
+            case 'txt':
+            case 'log':
+            case 'jpg':
+            case 'jpeg':
+            case 'png':
+            case 'gif':
+            case 'svg': 
+            case 'mp3':
+            case 'wav':
+            case 'ogg': 
+            case 'mp4':
+            case 'mov':
+            case 'webm': 
+                return '📄'; // Text / Default Media
+            default:
+                return '❓'; // Default atau file tidak dikenal
+        }
+    }
+
     function debounce(func, delay) {
         let timeout;
         return function(...args) {
@@ -392,46 +480,37 @@
     }
 
     // ----------------------------------------------------------------------
-    // --- 3. FUNGSI AUTOSAVE BARU ---
+    // --- 3. FUNGSI AUTOSAVE & UNDUH ---
     // ----------------------------------------------------------------------
     
     const editor = document.getElementById('file-editor');
     const saveStatus = document.getElementById('save-status');
     
-    /**
-     * Fungsi yang dipanggil oleh Debounce untuk menyimpan konten file.
-     */
     const autoSaveFileContent = async () => {
         const itemUUID = selectedItemId;
         const newContent = editor.textContent;
 
-        if (!itemUUID) return; // Pastikan ada file yang terpilih
+        if (!itemUUID) return; 
 
-        // 1. Tampilkan status "Menyimpan..."
         saveStatus.textContent = 'Menyimpan...';
         saveStatus.style.color = '#fff';
 
-        // 2. Lakukan Update ke Supabase
         const { error } = await supabase
             .from('folder_items')
             .update({ content: newContent })
             .eq('id', itemUUID);
 
-        // 3. Tangani hasil
         if (error) {
             saveStatus.textContent = `Gagal menyimpan: ${error.message}`;
             saveStatus.style.color = 'var(--danger-color)';
             console.error("Error saving content:", error);
         } else {
-            // Update cache data
             const cachedItem = allItemsData.find(i => i.id.toString() === itemUUID);
             if(cachedItem) cachedItem.content = newContent;
 
-            // Tampilkan status "Tersimpan" sebentar
             saveStatus.textContent = 'Tersimpan!';
             saveStatus.style.color = 'var(--success-color)';
             setTimeout(() => { 
-                // Hanya hapus status jika editor masih aktif pada file yang sama
                 if (editor.contentEditable === 'true' && selectedItemId === itemUUID) {
                     saveStatus.textContent = 'Menunggu perubahan...';
                     saveStatus.style.color = 'var(--subtext)';
@@ -440,11 +519,31 @@
         }
     };
 
-    // Buat versi debounced dari fungsi autosave (misalnya, tunda 500ms setelah user berhenti mengetik)
     const debouncedAutoSave = debounce(autoSaveFileContent, 500);
+    
+    window.downloadFileContent = function() {
+        if (!selectedItemId || !selectedItemName || editor.contentEditable === 'false') {
+            alert("Tidak ada file yang dapat diunduh.");
+            return;
+        }
 
+        const content = editor.textContent;
+        const filename = selectedItemName;
+
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url); 
+    };
+    
     // ----------------------------------------------------------------------
-    // --- 4. FUNGSI RENDER DAN LOGIC (Hampir tidak ada perubahan di sini) ---
+    // --- 4. FUNGSI RENDER (PERBAIKAN CREATEITEMELEMENT) ---
     // ----------------------------------------------------------------------
 
     function createItemElement(itemData) {
@@ -455,6 +554,15 @@
         li.id = itemId;
         const isFolder = itemData.type === 'folder';
 
+        let headerAttributes = '';
+        
+        // Tentukan ikon berdasarkan nama file jika ini adalah file
+        if (!isFolder) {
+            const icon = getFileIcon(itemData.name);
+            // Tambahkan data-icon langsung ke elemen header untuk diakses oleh CSS ::before
+            headerAttributes = `data-icon="${icon}"`; 
+        }
+
         const folderActions = isFolder 
             ? `
                 <button onclick="addNewItem('${itemId}', 'folder'); toggleMenu('${itemId}');">➕ Tambah Folder</button>
@@ -464,7 +572,7 @@
             : '';
 
         li.innerHTML = `
-            <div class="item-header" onclick="selectItem('${itemId}')">
+            <div class="item-header" onclick="selectItem('${itemId}')" ${headerAttributes}>
                 <span class="item-name">${itemData.name}</span>
                 <div class="controls" id="controls-${itemId}">
                     <button class="ellipsis-button" onclick="event.stopPropagation(); toggleMenu('${itemId}')">•••</button>
@@ -479,7 +587,7 @@
         `;
         return li;
     }
-
+    
     function buildTree(items) {
         const rootItems = [];
         const itemsMap = {};
@@ -539,10 +647,6 @@
         }
     });
 
-
-    // ----------------------------------------------------------------------
-    // --- 5. FUNGSI CRUD & LOGIC UTAMA (PENAMBAHAN LOGIKA AUTOSAVE) ---
-    // ----------------------------------------------------------------------
 
     window.fetchAndRenderItems = async function() {
         const rootList = document.getElementById('root-list');
@@ -674,6 +778,8 @@
              document.getElementById('file-editor').textContent = 'Silakan pilih file baru.';
              document.getElementById('file-editor').contentEditable = 'false';
              selectedItemId = null;
+             selectedItemName = null;
+             document.getElementById('download-button').style.display = 'none'; 
         }
 
         fetchAndRenderItems(); 
@@ -684,6 +790,7 @@
         const isFolder = item.classList.contains('folder');
         const itemUUID = itemId.replace('item-', '');
         const editor = document.getElementById('file-editor');
+        const downloadButton = document.getElementById('download-button');
         
         let name = item.querySelector('.item-header .item-name').textContent.trim();
         
@@ -699,21 +806,24 @@
         if (autosaveListener) {
             editor.removeEventListener('input', autosaveListener);
             autosaveListener = null;
-            saveStatus.textContent = ''; // Kosongkan status saat berpindah item
+            saveStatus.textContent = ''; 
         }
         
-        // 3. Seleksi
+        // 3. Seleksi & Update Global State
         document.querySelectorAll('.folder-list li').forEach(li => li.classList.remove('selected'));
         item.classList.add('selected');
         
         selectedItemId = itemUUID;
+        selectedItemName = name; 
+        
         document.getElementById('content-title').textContent = name;
         document.getElementById('content-type').textContent = isFolder ? 'Folder' : 'File';
         editor.contentEditable = isFolder ? 'false' : 'true';
 
-        // 4. Ambil Konten (Hanya untuk File)
+        // 4. Ambil Konten & Atur Tombol Unduh
         if (!isFolder) {
             editor.textContent = "Memuat konten...";
+            downloadButton.style.display = 'inline-block'; 
             
             const itemData = allItemsData.find(i => i.id.toString() === itemUUID);
 
@@ -735,20 +845,19 @@
             }
             
             // 5. Tambahkan Listener Autosave BARU
-            autosaveListener = debouncedAutoSave; // Gunakan fungsi debounced
+            autosaveListener = debouncedAutoSave; 
             editor.addEventListener('input', autosaveListener);
             saveStatus.textContent = 'Menunggu perubahan...';
             saveStatus.style.color = 'var(--subtext)';
 
         } else {
             editor.textContent = `--- Ini adalah Folder (${name}). Tidak ada konten yang dapat diedit di sini. ---`;
+            downloadButton.style.display = 'none'; 
+            saveStatus.textContent = '';
         }
     };
     
-    // Fungsi saveFileContent lama dihilangkan karena digantikan oleh autoSaveFileContent
-    
     document.addEventListener('DOMContentLoaded', fetchAndRenderItems);
 </script>
-
 </body>
 </html>
