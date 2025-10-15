@@ -300,33 +300,22 @@
             box-shadow: 0 0 10px rgba(0, 255, 195, 0.4);
         }
 
+        /* SEMBUNYIKAN SAVE AREA */
         .save-area {
             display: flex;
             align-items: center;
             gap: 15px;
             margin-top: 15px;
-        }
-
-        .save-area button { 
-            background-color: var(--success-color); 
-            color: var(--bg-card); 
-            border: none; 
-            padding: 8px 15px; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            transition: all 0.2s;
-            font-weight: 500;
-            box-shadow: 0 0 8px rgba(0, 230, 163, 0.5);
-        }
-        .save-area button:hover { 
-            background-color: #00b37c; 
-            box-shadow: 0 0 15px rgba(0, 230, 163, 0.7);
+            visibility: hidden; /* Sembunyikan tombol simpan */
+            height: 0;
         }
         
         #save-status {
             color: var(--success-color);
             font-weight: 500;
             text-shadow: 0 0 5px rgba(0, 230, 163, 0.5);
+            visibility: visible; /* Tetap tampilkan status */
+            height: auto;
         }
     </style>
 </head>
@@ -360,7 +349,7 @@
         </div>
         
         <div class="save-area">
-            <button onclick="saveFileContent()">💾 Simpan Perubahan</button>
+            <button style="display:none;">Tombol Simpan Disembunyikan</button>
             <span id="save-status"></span>
         </div>
     </div>
@@ -379,11 +368,83 @@
     
     let itemCounter = 1; 
     let selectedItemId = null; 
-    let allItemsData = []; // Menyimpan semua data untuk menghindari fetch berulang
-    
+    let allItemsData = []; 
+
+    // Variabel untuk menahan listener agar bisa dilepas
+    let autosaveListener = null;
 
     // ----------------------------------------------------------------------
-    // --- 2. FUNGSI RENDER DAN STRUKTUR (MODIFIKASI: KONTROL ELIPSIS) ---
+    // --- 2. DEBOUNCE UTILITY (PENTING UNTUK AUTOSAVE) ---
+    // ----------------------------------------------------------------------
+
+    /**
+     * Fungsi Debounce untuk membatasi frekuensi pemanggilan fungsi
+     * @param {function} func - Fungsi yang akan dipanggil
+     * @param {number} delay - Jeda waktu (ms)
+     */
+    function debounce(func, delay) {
+        let timeout;
+        return function(...args) {
+            const context = this;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), delay);
+        };
+    }
+
+    // ----------------------------------------------------------------------
+    // --- 3. FUNGSI AUTOSAVE BARU ---
+    // ----------------------------------------------------------------------
+    
+    const editor = document.getElementById('file-editor');
+    const saveStatus = document.getElementById('save-status');
+    
+    /**
+     * Fungsi yang dipanggil oleh Debounce untuk menyimpan konten file.
+     */
+    const autoSaveFileContent = async () => {
+        const itemUUID = selectedItemId;
+        const newContent = editor.textContent;
+
+        if (!itemUUID) return; // Pastikan ada file yang terpilih
+
+        // 1. Tampilkan status "Menyimpan..."
+        saveStatus.textContent = 'Menyimpan...';
+        saveStatus.style.color = '#fff';
+
+        // 2. Lakukan Update ke Supabase
+        const { error } = await supabase
+            .from('folder_items')
+            .update({ content: newContent })
+            .eq('id', itemUUID);
+
+        // 3. Tangani hasil
+        if (error) {
+            saveStatus.textContent = `Gagal menyimpan: ${error.message}`;
+            saveStatus.style.color = 'var(--danger-color)';
+            console.error("Error saving content:", error);
+        } else {
+            // Update cache data
+            const cachedItem = allItemsData.find(i => i.id.toString() === itemUUID);
+            if(cachedItem) cachedItem.content = newContent;
+
+            // Tampilkan status "Tersimpan" sebentar
+            saveStatus.textContent = 'Tersimpan!';
+            saveStatus.style.color = 'var(--success-color)';
+            setTimeout(() => { 
+                // Hanya hapus status jika editor masih aktif pada file yang sama
+                if (editor.contentEditable === 'true' && selectedItemId === itemUUID) {
+                    saveStatus.textContent = 'Menunggu perubahan...';
+                    saveStatus.style.color = 'var(--subtext)';
+                }
+            }, 3000);
+        }
+    };
+
+    // Buat versi debounced dari fungsi autosave (misalnya, tunda 500ms setelah user berhenti mengetik)
+    const debouncedAutoSave = debounce(autoSaveFileContent, 500);
+
+    // ----------------------------------------------------------------------
+    // --- 4. FUNGSI RENDER DAN LOGIC (Hampir tidak ada perubahan di sini) ---
     // ----------------------------------------------------------------------
 
     function createItemElement(itemData) {
@@ -394,7 +455,6 @@
         li.id = itemId;
         const isFolder = itemData.type === 'folder';
 
-        // Konten menu dropdown
         const folderActions = isFolder 
             ? `
                 <button onclick="addNewItem('${itemId}', 'folder'); toggleMenu('${itemId}');">➕ Tambah Folder</button>
@@ -424,7 +484,6 @@
         const rootItems = [];
         const itemsMap = {};
         items.forEach(item => { 
-             // Convert UUIDs to strings for consistent key access
              const idStr = item.id.toString(); 
              const parentIdStr = item.parent_id ? item.parent_id.toString() : null;
              itemsMap[idStr] = {...item, id: idStr, parent_id: parentIdStr, children: []}; 
@@ -441,7 +500,6 @@
     }
 
     function renderTree(items, ulElement) {
-        // Sort: Folders first, then alphabetically
         items.sort((a, b) => (b.type === 'folder') - (a.type === 'folder') || a.name.localeCompare(b.name));
         
         items.forEach(item => {
@@ -457,13 +515,9 @@
         });
     }
 
-    /**
-     * FUNGSI UTAMA BARU: Mengelola tampilan/penyembunyian menu elipsis
-     */
     window.toggleMenu = function(itemId) {
         const menu = itemId ? document.getElementById(`menu-${itemId}`) : null;
         
-        // 1. Sembunyikan semua menu yang sedang terbuka
         document.querySelectorAll('.dropdown-menu.visible').forEach(openMenu => {
             if (!itemId || openMenu.id !== `menu-${itemId}`) {
                 openMenu.classList.remove('visible');
@@ -471,7 +525,6 @@
             }
         });
 
-        // 2. Toggle menu yang diklik (jika ada itemID)
         if (menu) {
             const controls = document.getElementById(`controls-${itemId}`);
             menu.classList.toggle('visible');
@@ -479,9 +532,6 @@
         }
     };
 
-    /**
-     * MENUTUP MENU JIKA KLIK DI LUAR
-     */
     document.addEventListener('click', function(event) {
         let isInsideMenu = event.target.closest('.dropdown-menu, .ellipsis-button');
         if (!isInsideMenu) {
@@ -491,7 +541,7 @@
 
 
     // ----------------------------------------------------------------------
-    // --- 3. FUNGSI CRUD & LOGIC UTAMA ---
+    // --- 5. FUNGSI CRUD & LOGIC UTAMA (PENAMBAHAN LOGIKA AUTOSAVE) ---
     // ----------------------------------------------------------------------
 
     window.fetchAndRenderItems = async function() {
@@ -508,7 +558,7 @@
             return;
         }
 
-        allItemsData = data; // Cache data
+        allItemsData = data; 
         rootList.innerHTML = '';
         const tree = buildTree(data);
         renderTree(tree, rootList);
@@ -527,7 +577,6 @@
         
         const parentUUID = parentId ? parentId.replace('item-', '') : null;
         
-        // Memaksa insert baru, kemudian fetch ulang (lebih mudah untuk mempertahankan struktur tree)
         const { error } = await supabase
             .from('folder_items')
             .insert({ name: name, type: type, parent_id: parentUUID, content: initialContent }); 
@@ -538,9 +587,8 @@
             return; 
         }
         
-        await fetchAndRenderItems(); // Fetch ulang seluruh tree
+        await fetchAndRenderItems(); 
         
-        // Otomatis expand folder induk setelah fetch ulang
         if (parentId) {
             const parentElement = document.getElementById(parentId);
             if(parentElement) parentElement.classList.add('expanded');
@@ -588,7 +636,7 @@
             }
             input.remove();
             nameSpan.style.display = 'block'; 
-            fetchAndRenderItems(); // Fetch ulang untuk memastikan urutan dipertahankan
+            fetchAndRenderItems(); 
         };
 
         input.onblur = () => {
@@ -609,9 +657,6 @@
         
         const itemUUID = itemId.replace('item-', '');
         
-        // Dalam Supabase, menghapus item induk tidak otomatis menghapus anak, 
-        // tapi kita bisa andalkan RLS atau function di backend.
-        // Di sini kita hanya menghapus item yang dipilih.
         const { error } = await supabase
             .from('folder_items')
             .delete()
@@ -624,7 +669,6 @@
         }
         
         if (selectedItemId === itemUUID) {
-             // Reset content panel jika item yang sedang dibuka dihapus
              document.getElementById('content-title').textContent = 'Pilih File untuk Melihat Konten';
              document.getElementById('content-type').textContent = '';
              document.getElementById('file-editor').textContent = 'Silakan pilih file baru.';
@@ -632,7 +676,7 @@
              selectedItemId = null;
         }
 
-        fetchAndRenderItems(); // Fetch ulang untuk memastikan tree akurat
+        fetchAndRenderItems(); 
     };
     
     window.selectItem = async function(itemId) {
@@ -645,35 +689,37 @@
         
         // 1. Toggle Folder
         if (isFolder) {
-            // Hanya toggle jika yang diklik BUKAN tombol elipsis
             if (!event.target.closest('.controls')) {
                  item.classList.toggle('expanded'); 
             }
-            // Karena fungsi selectItem dipanggil dari item-header, kita perlu memastikan tidak ada menu elipsis yang terbuka
             toggleMenu(null);
         }
 
-        // 2. Seleksi
+        // 2. Hapus Listener Autosave lama (jika ada)
+        if (autosaveListener) {
+            editor.removeEventListener('input', autosaveListener);
+            autosaveListener = null;
+            saveStatus.textContent = ''; // Kosongkan status saat berpindah item
+        }
+        
+        // 3. Seleksi
         document.querySelectorAll('.folder-list li').forEach(li => li.classList.remove('selected'));
         item.classList.add('selected');
         
         selectedItemId = itemUUID;
-        document.getElementById('save-status').textContent = '';
         document.getElementById('content-title').textContent = name;
         document.getElementById('content-type').textContent = isFolder ? 'Folder' : 'File';
         editor.contentEditable = isFolder ? 'false' : 'true';
 
-        // 3. Ambil Konten (Hanya untuk File)
+        // 4. Ambil Konten (Hanya untuk File)
         if (!isFolder) {
             editor.textContent = "Memuat konten...";
             
-            // Cari data di cache allItemsData
             const itemData = allItemsData.find(i => i.id.toString() === itemUUID);
 
             if (itemData) {
                 editor.textContent = itemData.content || ''; 
             } else {
-                 // Fallback fetch jika tidak ada di cache
                  const { data, error } = await supabase
                     .from('folder_items')
                     .select('content')
@@ -688,47 +734,19 @@
                 }
             }
             
+            // 5. Tambahkan Listener Autosave BARU
+            autosaveListener = debouncedAutoSave; // Gunakan fungsi debounced
+            editor.addEventListener('input', autosaveListener);
+            saveStatus.textContent = 'Menunggu perubahan...';
+            saveStatus.style.color = 'var(--subtext)';
+
         } else {
             editor.textContent = `--- Ini adalah Folder (${name}). Tidak ada konten yang dapat diedit di sini. ---`;
         }
     };
     
-    window.saveFileContent = async function() {
-        const selected = document.querySelector('.folder-list li.selected');
-        const editor = document.getElementById('file-editor');
-        const saveStatus = document.getElementById('save-status');
-        
-        if (!selected || selected.classList.contains('folder')) {
-            alert("Pilih file yang dapat diedit terlebih dahulu.");
-            return;
-        }
-
-        saveStatus.textContent = 'Menyimpan...';
-        saveStatus.style.color = '#fff'; // Temporary white color
-        const itemUUID = selectedItemId;
-        const newContent = editor.textContent;
-
-        const { error } = await supabase
-            .from('folder_items')
-            .update({ content: newContent })
-            .eq('id', itemUUID);
-
-        if (error) {
-            saveStatus.textContent = `Gagal menyimpan: ${error.message}`;
-            saveStatus.style.color = 'var(--danger-color)';
-            console.error("Error saving content:", error);
-        } else {
-            // Update cache saat berhasil
-            const cachedItem = allItemsData.find(i => i.id.toString() === itemUUID);
-            if(cachedItem) cachedItem.content = newContent;
-
-            saveStatus.textContent = 'Tersimpan!';
-            saveStatus.style.color = 'var(--success-color)';
-            setTimeout(() => { saveStatus.textContent = ''; }, 3000);
-        }
-    }
-
-
+    // Fungsi saveFileContent lama dihilangkan karena digantikan oleh autoSaveFileContent
+    
     document.addEventListener('DOMContentLoaded', fetchAndRenderItems);
 </script>
 
