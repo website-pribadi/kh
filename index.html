@@ -3,14 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dual Page</title>
+<title>Dual Page - Modern UI</title>
 <link rel="icon" href="ikon2.png" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0b0e16;
-    --glass: rgba(255, 255, 255, 0.06);
+    --glass: rgba(255, 255, 255, 0.08); /* Sedikit lebih solid */
     --accent: #00ffc3;
+    --accent-dark: #00b38c; /* Warna gelap untuk gradasi */
     --text: #f5f5f5;
+    --shadow-light: rgba(255, 255, 255, 0.05);
+    --shadow-dark: rgba(0, 0, 0, 0.5);
   }
 
   * { box-sizing: border-box; }
@@ -22,127 +26,192 @@
     font-family: 'Poppins', sans-serif;
     background: radial-gradient(circle at top, #0f1624 0%, #06080e 100%);
     overflow: hidden;
+    color: var(--text);
   }
 
-  /* Sidebar */
+  /* Sidebar (PC) */
   .sidebar {
     width: 90px;
     backdrop-filter: blur(14px);
     background: var(--glass);
-    border-right: 1px solid rgba(255,255,255,0.1);
+    border-right: 1px solid var(--shadow-light);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
     padding: 20px 0;
     position: relative;
-    box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+    /* Ubah shadow agar lebih soft, mengikuti neomorphism */
+    box-shadow: 4px 0 10px var(--shadow-dark);
+    z-index: 100; /* Pastikan sidebar di atas iframe */
   }
 
+  /* Logo */
   .logo {
     width: 60px;
     height: 60px;
-    border-radius: 18px;
+    border-radius: 50%; /* Ubah menjadi lingkaran untuk tampilan lebih modern */
     background: linear-gradient(135deg, var(--accent), #00aaff);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 26px;
-    font-weight: bold;
+    font-size: 28px; /* Sedikit lebih besar */
+    font-weight: 700;
     color: #0b0e16;
-    box-shadow: 0 0 20px rgba(0,255,195,0.4);
+    box-shadow: 0 0 25px var(--accent), inset 0 0 10px var(--accent-dark); /* Shadow dan inset untuk kedalaman */
     animation: glow 3s ease-in-out infinite alternate;
+    margin-bottom: 20px; /* Tambahkan ruang bawah */
   }
 
   @keyframes glow {
-    from { box-shadow: 0 0 10px rgba(0,255,195,0.4); }
-    to { box-shadow: 0 0 25px rgba(0,255,195,0.8); }
+    from { box-shadow: 0 0 10px rgba(0,255,195,0.4), inset 0 0 5px var(--accent-dark); }
+    to { box-shadow: 0 0 30px rgba(0,255,195,0.8), inset 0 0 8px var(--accent-dark); }
   }
 
+  /* Menu */
   .menu {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 15px; /* Sedikit lebih rapat */
+    flex-grow: 1; /* Biarkan menu mengisi ruang tengah */
   }
 
   .menu button {
     background: none;
     border: none;
-    font-size: 24px;
+    font-size: 22px; /* Sedikit lebih kecil */
     color: var(--text);
     cursor: pointer;
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
+    width: 60px; /* Lebih lebar */
+    height: 60px; /* Lebih tinggi */
+    border-radius: 50%; /* Bentuk lingkaran untuk tombol */
     position: relative;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(4px);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Transisi lebih halus */
+    backdrop-filter: blur(8px); /* Blur lebih kuat */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light); /* Efek Neomorphism */
   }
 
   .menu button:hover {
-    transform: scale(1.12);
-    box-shadow: 0 0 15px rgba(0,255,195,0.4);
+    transform: translateY(-2px) scale(1.05); /* Sedikit naik saat hover */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,255,255,0.1);
     background: rgba(255,255,255,0.05);
   }
-
+  
+  /* Tombol Aktif */
   .menu button.active {
     background: linear-gradient(135deg, var(--accent), #00aaff);
     color: #000;
-    font-weight: bold;
-    box-shadow: 0 0 20px rgba(0,255,195,0.6);
+    font-weight: 700;
+    /* Efek 'ditekan' (inset shadow) */
+    box-shadow: inset 2px 2px 5px var(--accent-dark), inset -2px -2px 5px #4affff, 0 0 15px var(--accent);
+    transform: scale(0.95); /* Terlihat sedikit masuk */
   }
 
+  /* Tooltip (PC) */
   .menu button::after {
     content: attr(data-tooltip);
     position: absolute;
-    left: 70px;
+    left: 80px; /* Jarak lebih jauh dari tombol */
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(0,0,0,0.8);
-    color: #fff;
-    padding: 5px 10px;
-    border-radius: 8px;
+    background: var(--accent);
+    color: #000;
+    padding: 6px 12px;
+    border-radius: 10px;
     font-size: 13px;
+    font-weight: 600;
     white-space: nowrap;
     opacity: 0;
     pointer-events: none;
-    transition: 0.2s ease;
+    transition: 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
   }
 
   .menu button:hover::after {
     opacity: 1;
-    transform: translateY(-50%) translateX(5px);
+    transform: translateY(-50%) translateX(10px);
   }
 
+  /* Iframe Konten */
   iframe {
     flex: 1;
     border: none;
     width: 100%;
     height: 100%;
     transition: opacity 0.4s ease;
+    background-color: transparent; /* Pastikan konten tidak memiliki background putih */
   }
 
   iframe.fade {
     opacity: 0;
   }
 
-  /* Responsif (ubah sidebar ke bawah untuk HP) */
+  /* --- RESPONSIVE (MOBILE) --- */
   @media (max-width: 700px) {
     body { flex-direction: column; }
+    
     .sidebar {
-      flex-direction: row;
+      /* Ubah dari sidebar ke bottom-nav */
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
       width: 100%;
-      height: 80px;
+      height: 70px; /* Lebih tipis untuk HP */
+      flex-direction: row;
       border-right: none;
-      border-top: 1px solid rgba(255,255,255,0.1);
+      border-top: 1px solid var(--shadow-light);
       justify-content: space-around;
+      padding: 0 10px;
+      box-shadow: 0 -4px 10px var(--shadow-dark);
     }
-    .menu { flex-direction: row; gap: 10px; }
+    
+    .logo { 
+      display: none; /* Sembunyikan logo di HP untuk efisiensi ruang */
+    }
+    
+    .menu { 
+      flex-direction: row; 
+      gap: 5px; 
+      width: 100%;
+      justify-content: space-around;
+      margin: 0;
+    }
+    
+    .menu button {
+      width: 50px; 
+      height: 50px; 
+      font-size: 20px;
+      margin: 5px 0;
+      box-shadow: none; /* Hilangkan neomorphism di HP agar lebih datar */
+      background: none;
+    }
+    
+    .menu button:hover {
+      transform: none;
+    }
+    
+    .menu button.active {
+      /* Hanya berikan garis bawah/indikator */
+      background: none;
+      color: var(--accent);
+      box-shadow: none;
+      border-bottom: 3px solid var(--accent);
+      border-radius: 0;
+      transform: none;
+    }
+
     .menu button::after {
-      left: 50%;
-      top: -45px;
-      transform: translateX(-50%);
+      display: none; /* Sembunyikan tooltip di HP */
+    }
+
+    iframe {
+      height: calc(100vh - 70px); /* Iframe mengisi sisa ruang di atas bottom-nav */
+      margin-bottom: 70px;
     }
   }
 </style>
@@ -164,7 +233,7 @@
       <button data-tooltip="Codingan"
         onclick="loadPage(this, 'https://website-pribadi.github.io/kh/codingan.html')">💻</button>
 
-      <button data-tooltip="Codingan"
+      <button data-tooltip="Penyimpanan"
         onclick="loadPage(this, 'https://website-pribadi.github.io/kh/penyimpanan.html')">🗃️</button>
 
       <button data-tooltip="Perpustakaan"
@@ -177,15 +246,17 @@
 
   <script>
     const iframe = document.getElementById('content');
+    const menuButtons = document.querySelectorAll('.menu button');
 
     function loadPage(btn, url) {
-      document.querySelectorAll('.menu button').forEach(b => b.classList.remove('active'));
+      menuButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
       // Efek fade-out sebelum ganti halaman
       iframe.classList.add('fade');
       setTimeout(() => {
         iframe.src = url;
+        // Pilihan: Tambahkan loading indicator di sini
         iframe.onload = () => iframe.classList.remove('fade');
       }, 250);
     }
