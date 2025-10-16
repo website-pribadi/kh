@@ -3,121 +3,236 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ruang Pribadi Khalid</title>
+<title>Ruang Pribadi Khalid - Dashboard</title>
 <link rel="icon" href="ikon2.png" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg-dark: #0b0e16;
   --bg-card: #141829;
   --accent: #00ffc3; /* Neon Cyan */
-  --accent2: #7a5cff;
+  --accent2: #7a5cff; /* Neon Purple */
   --text: #f5f5f5;
   --subtext: #b0b0b0;
   --border: rgba(255,255,255,0.08);
+  --shadow-glow: 0 0 15px rgba(0,255,195,0.2);
 }
 * { box-sizing:border-box; margin:0; padding:0; }
 body {
-  min-height:100vh; font-family:'Poppins',sans-serif;
-  background:linear-gradient(145deg,#090d16,#101628);
+  min-height:100vh; 
+  font-family:'Poppins',sans-serif;
+  background:linear-gradient(145deg, #070a13, #101628); /* Gradien lebih gelap */
   color:var(--text);
-  display:flex; align-items:center; justify-content:center;
-  text-align:center; flex-direction:column; overflow:auto;
+  display:flex; 
+  align-items:center; 
+  justify-content:center;
+  text-align:center; 
+  flex-direction:column; 
+  overflow-x:hidden; /* Hindari scroll horizontal */
+  padding-bottom: 60px; /* Ruang untuk footer */
 }
-.time-info { position:absolute; top:20px; left:25px; text-align:left; line-height:1.3; animation:fadeIn 1.2s ease; }
-.time-info h1{ font-size:2em; color:var(--accent); margin-bottom:4px; text-shadow:0 0 10px rgba(0,255,195,0.5);}
-.time-info h2{ font-size:1em; color:var(--accent2); text-shadow:0 0 10px rgba(122,92,255,0.5); }
-.clock { position:absolute; top:20px; right:25px; font-size:1.6em; color:var(--accent); text-shadow:0 0 10px rgba(0,255,195,0.4); animation:fadeIn 1.2s ease; font-weight:500; }
-.main { max-width:800px; padding:0 20px; }
-.card { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:25px; margin-top:30px; box-shadow:0 0 25px rgba(0,0,0,0.3); transition:0.3s; }
-.card:hover { transform:translateY(-4px); box-shadow:0 0 35px rgba(0,255,195,0.15); }
-.card h3{ color:var(--accent); margin-bottom:15px; font-size:1.2em; }
-.card p{ color:var(--subtext); line-height:1.7; white-space:pre-line; }
-footer{ position:absolute; bottom:20px; font-size:0.85em; color:#777; }
-@keyframes fadeIn { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);} }
-.schedule-table { width:100%; border-collapse:collapse; text-align:left; font-size:0.95em; margin-top:10px; }
-.schedule-table th, .schedule-table td{ padding:10px 12px; border:1px solid var(--border); }
-.schedule-table th{ color:var(--accent2); text-shadow:0 0 5px rgba(122,92,255,0.4);}
-.schedule-table td{ color:var(--text);}
-.schedule-table tbody tr:nth-child(even){ background:rgba(255,255,255,0.03);}
-.schedule-table tbody tr:hover{ background:rgba(0,255,195,0.1); transition:0.3s;}
 
-/* Gaya Sorotan Jadwal Sedang Berlangsung BARU (Neon Glow) */
+/* Header Info */
+.header-container {
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: absolute;
+    top: 0;
+    z-index: 10;
+}
+.time-info { 
+    text-align:left; 
+    line-height:1.3; 
+    animation:fadeIn 1.2s ease; 
+}
+.time-info h1{ 
+    font-size:2.2em; /* Lebih besar di PC */
+    color:var(--accent); 
+    margin-bottom:4px; 
+    font-weight:700;
+    text-shadow:0 0 15px rgba(0,255,195,0.6); /* Glow lebih kuat */
+}
+.time-info h2{ 
+    font-size:1.1em; 
+    color:var(--accent2); 
+    font-weight:400;
+    text-shadow:0 0 10px rgba(122,92,255,0.4); 
+}
+.clock { 
+    font-size:1.8em; 
+    color:var(--accent); 
+    text-shadow:0 0 10px rgba(0,255,195,0.4); 
+    animation:fadeIn 1.2s ease; 
+    font-weight:600; 
+    margin-top: 5px;
+}
+
+/* Main Content (Untuk PC: Tampilan Kolom) */
+.main { 
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px;
+    display: flex; /* Aktifkan Flexbox untuk layout PC */
+    gap: 30px; /* Jarak antar kolom */
+    margin-top: 120px; /* Jarak dari header atas */
+}
+.card { 
+    background:var(--bg-card); 
+    border:1px solid var(--border); 
+    border-radius:18px; /* Sudut lebih membulat */
+    padding:30px; /* Padding lebih besar */
+    box-shadow:0 0 30px rgba(0,0,0,0.5); /* Shadow lebih dalam */
+    transition:transform 0.4s ease, box-shadow 0.4s ease; 
+    flex: 1; /* Biarkan card membagi ruang secara merata */
+    min-height: 400px; /* Tinggi minimum agar terlihat proporsional */
+    text-align: left; /* Teks di dalam card rata kiri */
+}
+.card:hover { 
+    transform:translateY(-6px); /* Perubahan hover lebih dramatis */
+    box-shadow:0 10px 40px rgba(0,0,0,0.6), 0 0 20px rgba(0,255,195,0.2); 
+}
+.card h3{ 
+    color:var(--accent); 
+    margin-bottom:20px; 
+    font-size:1.4em; /* Judul lebih besar */
+    font-weight:600;
+    border-bottom: 2px solid var(--accent); /* Garis bawah elegan */
+    padding-bottom: 10px;
+}
+.card p{ color:var(--subtext); line-height:1.7; white-space:pre-line; }
+footer{ position:fixed; bottom:0; width:100%; padding:10px; font-size:0.85em; color:#777; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px); z-index:10; }
+@keyframes fadeIn { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);} }
+
+/* Jadwal Table Styling */
+.schedule-table { width:100%; border-collapse:separate; border-spacing:0; text-align:left; font-size:0.95em; margin-top:10px; border-radius:10px; overflow:hidden; }
+.schedule-table th, .schedule-table td{ padding:12px 15px; border:none; }
+.schedule-table th{ color:var(--accent2); background:rgba(122,92,255,0.1); font-weight:600; }
+.schedule-table td{ color:var(--text); border-bottom:1px solid var(--border);}
+.schedule-table tbody tr:nth-child(even){ background:rgba(255,255,255,0.03);}
+.schedule-table tbody tr:hover{ background:rgba(0,255,195,0.1); transform:scale(1.01); transition:0.3s;}
+
+/* Gaya Sorotan Jadwal Sedang Berlangsung (Neon Glow Intens) */
 .active-class {
-    background: #008f76 !important; /* Latar belakang hijau pekat */
-    border: 1px solid var(--accent) !important;
-    /* Efek bayangan luar (glow) */
-    box-shadow: 0 0 12px var(--accent), inset 0 0 8px var(--accent); 
+    background: linear-gradient(90deg, #008f76 0%, #006b5a 100%) !important; 
+    border-left: 5px solid var(--accent) !important; /* Indikator tebal di kiri */
+    box-shadow: 0 0 15px var(--accent) inset, 0 0 8px rgba(0,255,195,0.8); 
     font-weight: bold;
     transition: all 0.5s;
+    transform:scale(1.02);
 }
 .active-class td {
-    color: var(--bg-card) !important; /* Teks berwarna gelap untuk kontras */
+    color: #fff !important; 
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
 
 /* Gaya Daftar Tugas */
-.todo-container { text-align: left; }
-#todo-list { list-style: none; padding: 0; }
+.todo-container { padding-right: 10px; /* Ruang untuk scrollbar di PC */ }
+#todo-list { list-style: none; padding: 0; max-height: 400px; overflow-y: auto; }
+/* Style Scrollbar Kustom (Hanya untuk PC) */
+#todo-list::-webkit-scrollbar { width: 6px; }
+#todo-list::-webkit-scrollbar-thumb { background: var(--accent2); border-radius: 3px; }
+#todo-list::-webkit-scrollbar-track { background: var(--bg-card); }
+
 #todo-list li {
-  padding: 10px 5px;
+  padding: 12px 0;
   border-bottom: 1px solid var(--border);
-  word-break: break-word;
   display: flex; 
   align-items: center;
+  justify-content: space-between;
+  animation: fadeIn 0.8s ease;
 }
 #todo-list li:last-child { border-bottom: none; }
-#todo-list li .task-details {
-    flex-grow: 1; 
-}
+#todo-list li .task-details { flex-grow: 1; }
 #todo-list li .task-title {
-    font-weight: 500;
+    font-weight: 600;
     color: var(--text);
     display: block;
+    font-size: 1.05em;
 }
 #todo-list li .task-due {
-    font-size: 0.85em;
+    font-size: 0.8em;
     color: var(--subtext);
     display: block;
-    margin-top: 2px;
+    margin-top: 4px;
 }
 /* Style untuk batas waktu yang sudah lewat */
 #todo-list li .task-due.overdue {
-    color: #ff5555; 
+    color: #ff7777; 
     font-weight: bold;
 }
 /* Gaya Tombol Selesai */
 .done-btn {
     background: var(--accent);
     color: var(--bg-card);
-    padding: 6px 12px;
+    padding: 8px 16px; /* Lebih besar */
     border: none;
-    border-radius: 6px;
-    font-size: 0.85em;
+    border-radius: 8px; /* Lebih membulat */
+    font-size: 0.9em;
     cursor: pointer;
-    transition: opacity 0.3s, background 0.3s;
+    font-weight: 600;
+    transition: all 0.3s;
     margin-left: 15px;
 }
 .done-btn:hover {
     background: #00e6a3;
+    box-shadow: 0 0 10px var(--accent);
 }
 
 
-@media (max-width:600px){
-  .time-info{ top:15px; left:15px;}
-  .time-info h1{ font-size:1.3em;}
-  .time-info h2{ font-size:1em;}
-  .clock{ top:15px; right:25px; font-size:1.2em;}
-  .card{ width:90%; margin:20px auto;}
+/* --- RESPONSIVE (MOBILE) --- */
+@media (max-width:768px){
+  body { padding-bottom: 40px; }
+  .header-container { flex-direction: column; align-items: center; padding: 15px; }
+  .time-info{ text-align:center; width: 100%; margin-bottom: 10px; }
+  .time-info h1{ font-size:1.8em;}
+  .time-info h2{ font-size:0.9em;}
+  .clock{ position:static; font-size:1.5em; margin-bottom: 0; }
+  
+  /* Main Content (Untuk HP: Tampilan Stack) */
+  .main{ 
+    flex-direction: column; /* Ubah menjadi kolom */
+    gap: 20px;
+    padding: 15px;
+    margin-top: 100px; /* Jarak dari header */
+  }
+  .card{ 
+    width:100%; 
+    min-height: unset; /* Hapus min-height */
+    padding: 20px;
+  }
+  .card:hover { transform:none; box-shadow:0 0 20px rgba(0,0,0,0.3); } /* Hapus hover di HP */
+  .card h3{ font-size:1.2em; margin-bottom: 15px; }
+
+  .schedule-table th, .schedule-table td{ padding: 10px; font-size: 0.85em; }
+
+  .done-btn {
+      padding: 6px 10px; 
+      font-size: 0.8em;
+  }
+
+  /* Sembunyikan hari/guru di tampilan HP untuk menghemat ruang */
+  .schedule-table th:first-child, 
+  .schedule-table td:first-child,
+  .schedule-table th:last-child, 
+  .schedule-table td:last-child {
+      display: none; 
+  }
 }
 </style>
 </head>
 <body>
 
-<div class="time-info">
-  <h1 id="greeting">Selamat Datang, Khalid</h1>
-  <h2 id="today">Memuat tanggal...</h2>
+<div class="header-container">
+    <div class="time-info">
+      <h1 id="greeting">Selamat Datang, Khalid</h1>
+      <h2 id="today">Memuat tanggal...</h2>
+    </div>
+    <div class="clock" id="clock">00:00:00</div>
 </div>
-
-<div class="clock" id="clock">00:00:00</div>
 
 <div class="main">
   <div class="card">
@@ -134,19 +249,17 @@ footer{ position:absolute; bottom:20px; font-size:0.85em; color:#777; }
     <table class="schedule-table" id="schedule-table">
       <thead>
         <tr>
-          <th>Hari</th>
-          <th>Jam</th>
+          <th>Hari</th> <th>Jam</th>
           <th>Mapel</th>
-          <th>Guru</th>
-        </tr>
+          <th>Guru</th> </tr>
       </thead>
       <tbody></tbody>
     </table>
-    <p id="no-schedule" style="margin-top:10px; color:var(--subtext); display:none;">Tidak ada jadwal pelajaran untuk hari ini.</p>
+    <p id="no-schedule" style="margin-top:20px; color:var(--subtext); display:none;">Tidak ada jadwal pelajaran untuk hari ini. Waktunya santai!</p>
   </div>
 </div>
 
-<footer>© 2025 Khalid — Ruang Pribadi.</footer>
+<footer>© 2025 Khalid — Ruang Pribadi. Ditenagai oleh Supabase.</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <script>
@@ -188,6 +301,11 @@ async function markTaskAsDone(taskId) {
     if (error) {
         console.error("Gagal memperbarui status tugas:", error);
         alert(`Gagal menyelesaikan tugas: ${error.message}.`);
+        if (li) {
+            li.querySelector('.done-btn').textContent = 'Selesai';
+            li.querySelector('.done-btn').disabled = false;
+        }
+        return;
     }
 
     loadTugas(); 
@@ -206,6 +324,7 @@ async function loadTugas() {
     .from("tugas") 
     .select("id, judul, tanggal_awal, tanggal_akhir, is_done") 
     .eq('is_done', false) 
+    .order('tanggal_akhir', { ascending: true }) // Urutkan berdasarkan batas waktu terdekat
     .order('tanggal_awal'); 
 
   if (error) {
@@ -224,7 +343,7 @@ function renderTugas(tasks) {
   
   if (!tasks || tasks.length === 0) {
     const li = document.createElement("li");
-    li.textContent = "Tidak ada tugas aktif yang belum selesai saat ini.";
+    li.textContent = "Tidak ada tugas aktif yang belum selesai saat ini. Kerja bagus!";
     li.style.color = "var(--subtext)";
     todoList.appendChild(li);
   } else {
@@ -238,20 +357,25 @@ function renderTugas(tasks) {
       let dueText = '';
       let dateStatusClass = '';
 
-      if (start) {
-          const startDateString = start.toLocaleDateString('id-ID', {day: 'numeric', month: 'short'});
-          dueText += `Mulai: ${startDateString}`;
-      }
-      
+      // Tentukan Batas Waktu
       if (end) {
           const endDateString = end.toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'});
-          dueText += (dueText ? ' | ' : '') + `Batas Waktu: ${endDateString}`;
-
+          
+          dueText = `Batas Waktu: ${endDateString}`;
           if (end < today && task.is_done !== true) {
-              dateStatusClass = 'overdue';
+              dateStatusClass = 'overdue'; // Tugas Terlambat
           }
       } else {
-           dueText += (dueText ? ' | ' : '') + `Batas Waktu: Tidak Ditentukan`;
+           dueText = `Batas Waktu: Tidak Ditentukan`;
+      }
+
+      // Tentukan Tanggal Mulai (Optional)
+      if (start && end && start.getTime() !== end.getTime()) {
+          const startDateString = start.toLocaleDateString('id-ID', {day: 'numeric', month: 'short'});
+          dueText = `Mulai: ${startDateString} | ${dueText}`;
+      } else if (start && !end) {
+          const startDateString = start.toLocaleDateString('id-ID', {day: 'numeric', month: 'short'});
+          dueText = `Mulai: ${startDateString}`;
       }
       
       li.innerHTML = `
@@ -294,16 +418,20 @@ function renderTable(){
   if (scheduleForToday && scheduleForToday.length > 0) {
       hasSchedule = true;
       
-      // 2. Tambahkan Baris Header Hari Ini
-      const headerTr = document.createElement('tr');
-      headerTr.innerHTML = `<th colspan="4" style="text-align: center; background: var(--accent2); color: var(--bg-card); padding: 8px;">${todayName.toUpperCase()}</th>`;
-      tbody.appendChild(headerTr);
+      // 2. Tidak perlu header hari di dalam table karena card sudah spesifik "Hari Ini"
 
       // 3. Urutkan mata pelajaran hari ini berdasarkan jam mulai
       scheduleForToday.sort((a, b) => {
-          const startTimeA = parseInt(a.jam.split('–')[0].trim().replace(':', ''));
-          const startTimeB = parseInt(b.jam.split('–')[0].trim().replace(':', ''));
-          return startTimeA - startTimeB;
+          // Fungsi untuk mengubah format jam "HH:MM" menjadi menit total
+          const timeToMinutes = (timeStr) => {
+            if (!timeStr) return 0;
+            const parts = timeStr.split(':').map(Number);
+            return parts.length === 2 ? parts[0] * 60 + parts[1] : 0;
+          };
+          
+          const startA = a.jam.split('–')[0].trim();
+          const startB = b.jam.split('–')[0].trim();
+          return timeToMinutes(startA) - timeToMinutes(startB);
       });
 
       // 4. Tambahkan Baris Mata Pelajaran
@@ -320,7 +448,6 @@ function renderTable(){
                 const startMinutes = parseInt(startParts[0])*60 + parseInt(startParts[1]);
                 const endMinutes   = parseInt(endParts[0])*60 + parseInt(endParts[1]);
 
-                // Gunakan < endMinutes agar tidak bentrok dengan awal kelas berikutnya
                 if(nowMinutes >= startMinutes && nowMinutes < endMinutes){ 
                     rowClass = 'active-class'; 
                 }
