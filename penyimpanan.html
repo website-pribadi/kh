@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Explore</title>
-
+    <title>File Explorer | Neon Dark</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Consolas:wght@400;700&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
@@ -16,12 +17,13 @@
             --accent2: #7a5cff; /* Neon Purple */
             --text: #f5f5f5;
             --subtext: #b0b0b0;
-            --border: rgba(255,255,255,0.08);
-            --hover-color: #1a223f; /* Hover background slightly brighter than card */
-            --select-color: rgba(0, 255, 195, 0.15); /* Selected background */
-            --danger-color: #ff5555;
+            --border: rgba(255,255,255,0.15); /* Border sedikit lebih terang */
+            --hover-color: #1a223f; 
+            --select-color: rgba(0, 255, 195, 0.2); 
+            --danger-color: #ff6666; /* Merah sedikit lebih lembut */
             --success-color: #00e6a3;
-            --header-height: 50px;
+            --header-height: 55px; /* Tinggi header ditingkatkan */
+            --sidebar-width: 300px;
         }
 
         /* --- 2. RESET DAN LAYOUT UTAMA (DARK) --- */
@@ -30,73 +32,82 @@
 
         body { 
             font-family:'Poppins', sans-serif;
-            background:linear-gradient(145deg,#090d16,#101628); /* Dark Gradient */
+            background:linear-gradient(145deg,#070a13,#101628); /* Darker Gradient */
             color:var(--text); 
             height: 100vh; 
             display: flex;
             flex-direction: column;
+            overflow: hidden; /* Mencegah scroll body */
         }
 
+        /* Header (Global Top Bar) */
         .header {
             height: var(--header-height);
-            background-color: var(--accent2); /* Neon Purple Header */
+            background-color: var(--accent2); 
             color: var(--text);
             padding: 0 20px;
             display: flex;
             align-items: center;
-            font-size: 1.2em;
-            font-weight: 600;
-            box-shadow: 0 4px 20px rgba(122, 92, 255, 0.3);
+            font-size: 1.3em; /* Lebih besar */
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(122, 92, 255, 0.4); /* Shadow lebih kuat */
+            flex-shrink: 0;
+            z-index: 10;
         }
 
         .file-explorer { 
             display: flex; 
             flex-grow: 1; 
+            min-height: 0; /* Penting untuk flex layout */
         }
 
         /* --- 3. SIDEBAR (EXPLORER TREE) --- */
 
         .sidebar { 
-            width: 300px; 
-            background-color: var(--bg-card); /* Dark Card BG */
+            width: var(--sidebar-width); 
+            background-color: var(--bg-card); 
             border-right: 1px solid var(--border); 
-            padding: 15px; 
+            padding: 20px; /* Padding lebih besar */
             overflow-y: auto; 
             flex-shrink: 0; 
             display: flex;
             flex-direction: column;
+            transition: transform 0.3s ease-out; /* Transisi untuk mobile */
         }
-
+        
         .sidebar h2 {
-            margin: 0 0 15px 0;
+            margin: 0 0 20px 0;
             padding-bottom: 10px;
-            border-bottom: 1px solid var(--border);
-            font-size: 1.1em;
-            font-weight: 600;
-            color: var(--accent); /* Neon Cyan Title */
-            text-shadow: 0 0 5px rgba(0,255,195,0.4);
+            border-bottom: 2px solid rgba(0,255,195,0.4); /* Garis bawah lebih tegas */
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--accent); 
+            text-shadow: 0 0 10px rgba(0,255,195,0.6);
         }
 
         .action-bar { 
-            margin-bottom: 15px; 
+            margin-bottom: 20px; 
             display: flex;
-            gap: 8px;
+            gap: 10px; /* Jarak tombol lebih besar */
+            flex-wrap: wrap;
         }
         .action-bar button { 
-            background-color: var(--accent); /* Neon Cyan Button */
-            color: var(--bg-dark); /* Dark Text on Button */
+            background-color: var(--accent); 
+            color: var(--bg-dark); 
             border: none; 
-            padding: 6px 12px; 
-            border-radius: 4px; 
+            padding: 8px 15px; /* Tombol lebih besar */
+            border-radius: 6px; 
             cursor: pointer; 
-            font-size: 0.9em;
-            font-weight: 500;
-            transition: all 0.2s;
-            box-shadow: 0 0 8px rgba(0,255,195,0.5);
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(0,255,195,0.5);
+            flex-grow: 1;
         }
         .action-bar button:hover { 
             background-color: #00e6a3; 
-            box-shadow: 0 0 15px rgba(0,255,195,0.7);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,255,195,0.8);
         }
 
         /* --- 4. LIST FILE/FOLDER STYLING (DARK) --- */
@@ -106,72 +117,50 @@
             padding-left: 0; 
             margin: 0; 
             user-select: none;
+            line-height: 1.5;
         }
         
-        .folder-list > li > ul.folder-list { 
-            padding-left: 20px; 
-            display: none; 
-        }
+        .folder-list > li > ul.folder-list { padding-left: 20px; display: none; }
+        .folder-list li.expanded > ul.folder-list { display: block; }
         
-        .folder-list li.expanded > ul.folder-list {
-            display: block; 
-        }
-        
-        .folder-list li {
-            margin: 0; 
-            position: relative;
-        }
-
         .item-header {
             display: flex; 
             align-items: center;
             justify-content: space-between; 
-            padding: 5px 8px; 
+            padding: 6px 10px; 
             cursor: pointer;
-            border-radius: 3px;
+            border-radius: 6px; /* Sudut lebih membulat */
+            transition: background-color 0.2s, border 0.2s;
         }
 
         .folder-list li:hover > .item-header { background-color: var(--hover-color); }
         .folder-list li.selected > .item-header { 
             background-color: var(--select-color); 
-            font-weight: 500; 
-            border: 1px solid var(--accent); /* Neon border on selection */
-            padding: 4px 7px; /* Adjust padding for border */
+            font-weight: 600; 
+            border: 1px solid var(--accent); 
+            box-shadow: 0 0 5px rgba(0,255,195,0.5) inset;
+            padding: 5px 9px;
         }
         
         /* Ikon Folder/File - BASE STYLE */
-        .item-header::before { 
-            content: " "; 
-            display: inline-block; 
-            width: 18px; 
-            text-align: center; 
-            margin-right: 6px; 
+        .item-header .icon {
+            margin-right: 8px; 
             vertical-align: middle; 
             font-size: 16px; 
-            transition: transform 0.2s;
+            width: 18px;
+            text-align: center;
         }
-        
-        /* Default Icons */
-        .folder-list li.file > .item-header::before { 
-            content: attr(data-icon); 
-            color: var(--subtext); 
-            font-size: 14px;
-        }
-        .folder-list li.folder > .item-header::before { 
-            content: '📁'; 
-            color: var(--accent2); 
-        } 
-        .folder-list li.folder.expanded > .item-header::before { 
-            content: '📂'; 
-        } 
+        .folder-list li.file > .item-header .icon { color: var(--subtext); font-size: 14px; }
+        .folder-list li.folder > .item-header .icon { color: var(--accent2); } 
         
         .folder-list li.folder > .item-header .item-name::before {
             content: '▶';
-            font-size: 8px;
+            font-size: 9px;
             margin-right: 5px;
-            color: var(--accent); /* Toggle Icon: Neon Cyan */
+            color: var(--accent); 
             transition: transform 0.2s;
             display: inline-block;
+            font-family: Arial, sans-serif;
         }
         .folder-list li.folder.expanded > .item-header .item-name::before {
             content: '▼';
@@ -182,7 +171,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            padding: 0 5px; 
+            padding-right: 5px; 
             display: flex;
             align-items: center;
         }
@@ -190,12 +179,11 @@
         /* Style untuk input edit nama */
         .item-edit-input {
             flex-grow: 1;
-            padding: 2px 4px;
+            padding: 4px 6px;
             margin-right: -4px; 
-            border: 1px solid var(--accent);
-            border-radius: 3px;
+            border: 2px solid var(--accent);
+            border-radius: 4px;
             font-size: 1em;
-            line-height: 1.2;
             box-sizing: border-box;
             background-color: var(--bg-dark);
             color: var(--text);
@@ -208,19 +196,19 @@
             flex-shrink: 0;
             padding-left: 5px;
             opacity: 0;
-            transition: opacity 0.2s;
+            transition: opacity 0.3s;
         }
-        
-        .folder-list li:hover > .item-header .controls { opacity: 1; } 
+        /* Selalu tampilkan kontrol di HP, atau saat menu terbuka */
+        .folder-list li:hover > .item-header .controls,
         .controls.active { opacity: 1; } 
-
+        
         .ellipsis-button {
             background: none;
             border: none;
             cursor: pointer;
             color: var(--subtext);
             font-weight: bold;
-            font-size: 1em;
+            font-size: 1.2em;
             padding: 2px 5px;
             border-radius: 3px;
             transition: color 0.2s, background-color 0.2s;
@@ -233,25 +221,24 @@
         .dropdown-menu {
             position: absolute;
             top: 100%; 
-            right: 10px; 
+            right: 0; 
             background-color: var(--bg-card);
-            border: 1px solid var(--accent); /* Neon Border */
-            box-shadow: 0 0 15px rgba(0,255,195,0.2);
-            border-radius: 4px;
+            border: 1px solid var(--accent); 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5), 0 0 10px rgba(0,255,195,0.4);
+            border-radius: 6px;
             z-index: 1000;
-            min-width: 150px;
+            min-width: 180px;
             padding: 5px 0;
             display: none;
         }
 
-        .dropdown-menu.visible {
-            display: block;
-        }
+        .dropdown-menu.visible { display: block; }
 
         .dropdown-menu button {
-            display: block;
+            display: flex;
+            align-items: center;
             width: 100%;
-            padding: 8px 15px;
+            padding: 10px 15px;
             text-align: left;
             background: none;
             border: none;
@@ -259,18 +246,16 @@
             font-size: 0.9em;
             color: var(--text);
             white-space: nowrap;
+            transition: background-color 0.2s;
         }
 
         .dropdown-menu button:hover {
             background-color: var(--hover-color);
             color: var(--accent);
         }
-        /* Style khusus untuk tombol Hapus */
-        .dropdown-menu button.delete-btn {
-            color: var(--danger-color);
-        }
+        .dropdown-menu button.delete-btn { color: var(--danger-color); }
         .dropdown-menu button.delete-btn:hover {
-            background-color: rgba(255, 85, 85, 0.2);
+            background-color: rgba(255, 102, 102, 0.2);
             color: var(--danger-color);
         }
 
@@ -279,22 +264,22 @@
         .content-panel { 
             flex-grow: 1; 
             background-color: var(--bg-dark); 
-            padding: 20px; 
+            padding: 25px; /* Padding lebih besar */
             overflow-y: auto; 
             position: relative; 
         }
         
-        /* Kontainer untuk judul dan tombol unduh */
         .content-header-row {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 5px;
+            align-items: center; /* Align-items center untuk header */
+            margin-bottom: 10px;
         }
 
         .content-panel h3 {
             color: var(--accent);
-            text-shadow: 0 0 5px rgba(0,255,195,0.4);
+            text-shadow: 0 0 8px rgba(0,255,195,0.5);
+            font-size: 1.5em; /* Lebih besar */
             margin: 0; 
             flex-shrink: 1;
             overflow: hidden;
@@ -302,77 +287,148 @@
             white-space: nowrap;
         }
         
-        /* Tombol Unduh */
         #download-button {
             background-color: var(--accent2); 
             color: var(--text); 
             border: none; 
-            padding: 5px 10px; 
-            border-radius: 4px; 
+            padding: 8px 15px; 
+            border-radius: 6px; 
             cursor: pointer; 
             font-size: 0.9em;
-            font-weight: 500;
-            transition: all 0.2s;
-            box-shadow: 0 0 8px rgba(122, 92, 255, 0.5);
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(122, 92, 255, 0.5);
             margin-left: 15px;
             flex-shrink: 0;
             display: none; 
         }
         #download-button:hover { 
             background-color: #6a49e0; 
-            box-shadow: 0 0 15px rgba(122, 92, 255, 0.7);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(122, 92, 255, 0.7);
         }
         
         .file-content { 
             white-space: pre-wrap; 
             background-color: var(--bg-card); 
-            padding: 15px; 
-            border-radius: 5px; 
-            min-height: 200px; 
-            font-family: 'Consolas', 'Courier New', monospace; 
-            font-size: 0.9em; 
+            padding: 20px; 
+            border-radius: 8px; 
+            min-height: 400px; 
+            font-family: 'Consolas', monospace; 
+            font-size: 0.95em; 
             border: 1px solid var(--border);
-            height: 400px; 
+            height: calc(100vh - var(--header-height) - 150px); /* Ketinggian dinamis */
             overflow: auto; 
             color: var(--text);
-            transition: border-color 0.3s;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            line-height: 1.6;
         }
         
         #file-editor[contenteditable="true"] {
             border-color: var(--accent);
-            box-shadow: 0 0 10px rgba(0, 255, 195, 0.4);
-        }
-
-        .save-area {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-top: 15px;
-            visibility: hidden; 
-            height: 0;
+            box-shadow: 0 0 15px rgba(0, 255, 195, 0.6);
         }
         
         #save-status {
             color: var(--success-color);
-            font-weight: 500;
+            font-weight: 600;
             text-shadow: 0 0 5px rgba(0, 230, 163, 0.5);
-            visibility: visible; 
-            height: auto;
-            margin-top: 5px; 
+            margin-top: 10px;
             display: block;
+        }
+
+        /* --- 6. RESPONSIVITAS (MOBILE) --- */
+
+        @media (max-width: 900px) {
+            .file-explorer {
+                position: relative; /* Container untuk sidebar absolute */
+            }
+
+            .sidebar {
+                position: absolute; /* Sidebar menjadi overlay */
+                left: 0;
+                top: 0;
+                height: 100%;
+                width: 75%; /* Lebih lebar di mobile */
+                z-index: 50;
+                transform: translateX(-100%); /* Sembunyikan default */
+                box-shadow: 5px 0 15px rgba(0,0,0,0.8);
+            }
+
+            .sidebar.visible {
+                transform: translateX(0);
+            }
+            
+            .content-panel {
+                padding: 15px; /* Padding lebih kecil di mobile */
+                width: 100%;
+            }
+
+            .content-header-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .content-panel h3 {
+                font-size: 1.3em;
+            }
+
+            .action-bar {
+                flex-wrap: nowrap;
+                overflow-x: auto; /* Scroll horizontal untuk tombol */
+                padding-bottom: 5px;
+                border-bottom: 1px solid var(--border);
+            }
+            .action-bar button {
+                flex-shrink: 0;
+                padding: 6px 10px;
+                font-size: 0.9em;
+            }
+            
+            .file-content {
+                min-height: 300px;
+                height: calc(100vh - var(--header-height) - 130px);
+            }
+        }
+        
+        /* Tombol Toggle Sidebar (Hanya di Mobile) */
+        .sidebar-toggle {
+            display: none;
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            background-color: var(--accent);
+            color: var(--bg-dark);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 1.2em;
+            cursor: pointer;
+            z-index: 51;
+            box-shadow: 0 0 10px rgba(0,255,195,0.5);
+        }
+        @media (max-width: 900px) {
+            .sidebar-toggle {
+                display: block;
+            }
+            .header {
+                padding-left: 60px; /* Ruang untuk tombol toggle */
+            }
         }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <span style="margin-right: 10px;">⚡</span> File Explorer <span style="font-size: 0.7em; margin-left: 10px; color: #a9a9a9;"></span>
+    <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <span style="margin-right: 10px;">⚡</span> File Explorer
 </div>
 
 <div class="file-explorer">
     
-    <div class="sidebar">
-        <h2><span style="font-size: 1.2em;">🗂️</span> Daftar Folder</h2>
+    <div class="sidebar" id="sidebar">
+        <h2><span style="margin-right: 8px;">🗂️</span> Daftar Folder</h2>
         
         <div class="action-bar">
             <button onclick="addNewItem(null, 'folder'); toggleMenu(null);">➕ Folder</button>
@@ -389,16 +445,20 @@
              <h3 id="content-title">Pilih File untuk Melihat Konten</h3>
              <button id="download-button" onclick="downloadFileContent()"><span style="margin-right: 5px;">⬇️</span> Unduh</button>
         </div>
-        <p style="color: var(--subtext);">Tipe: <span id="content-type"></span></p>
+        <p style="color: var(--subtext); font-size: 0.9em;">Tipe: <span id="content-type"></span></p>
         
         <div class="file-content" id="file-editor" contenteditable="false">
+            Selamat datang di File Explorer!
+            
+            Gunakan sidebar di kiri untuk:
+            1. Menambah folder/file baru.
+            2. Mengedit/menghapus item.
+            3. Memilih file untuk mengedit konten di sini.
+
+            *Ini adalah editor konten. Perubahan akan disimpan secara otomatis.*
         </div>
         
         <span id="save-status"></span>
-        
-        <div class="save-area">
-            <button style="display:none;">Tombol Simpan Disembunyikan</button>
-        </div>
     </div>
 
 </div>
@@ -421,51 +481,23 @@
     let autosaveListener = null;
 
     // ----------------------------------------------------------------------
-    // --- 2. FUNGSI UTILITY BARU (ICON & DEBOUNCE) ---
+    // --- 2. FUNGSI UTILITY & RESPONSIVITAS ---
     // ----------------------------------------------------------------------
 
-    /**
-     * Mendapatkan ikon emoji berdasarkan ekstensi file
-     * CATATAN: Ikon Gambar, Audio, dan Video telah dihapus/diganti dengan '📄'.
-     * @param {string} filename - Nama file.
-     * @returns {string} Emoji yang sesuai.
-     */
     function getFileIcon(filename) {
         const ext = filename.split('.').pop().toLowerCase();
         
         switch (ext) {
-            case 'js':
-            case 'ts':
-            case 'mjs':
-                return '📜'; // Script/JS
-            case 'html':
-            case 'htm':
-                return '🌐'; // Web/HTML
-            case 'css':
-                return '🎨'; // Style/CSS
-            case 'json':
-            case 'yaml':
-            case 'yml':
-                return '⚙️'; // Config/Data
-            case 'md':
-            case 'markdown':
-                return '📝'; // Markdown
-            case 'txt':
-            case 'log':
-            case 'jpg':
-            case 'jpeg':
-            case 'png':
-            case 'gif':
-            case 'svg': 
-            case 'mp3':
-            case 'wav':
-            case 'ogg': 
-            case 'mp4':
-            case 'mov':
-            case 'webm': 
-                return '📄'; // Text / Default Media
-            default:
-                return '❓'; // Default atau file tidak dikenal
+            case 'js': case 'ts': case 'mjs': return '📜'; // Script/JS
+            case 'html': case 'htm': return '🌐'; // Web/HTML
+            case 'css': return '🎨'; // Style/CSS
+            case 'json': case 'yaml': case 'yml': return '⚙️'; // Config/Data
+            case 'md': case 'markdown': return '📝'; // Markdown
+            case 'txt': case 'log': return '📄'; // Text
+            case 'jpg': case 'jpeg': case 'png': case 'gif': case 'svg': return '🖼️'; // Gambar
+            case 'mp3': case 'wav': case 'ogg': return '🎧'; // Audio
+            case 'mp4': case 'mov': case 'webm': return '📹'; // Video
+            default: return '❓'; // Default atau file tidak dikenal
         }
     }
 
@@ -477,6 +509,14 @@
             timeout = setTimeout(() => func.apply(context, args), delay);
         };
     }
+    
+    window.toggleSidebar = function() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('visible');
+        // Tutup menu dropdown jika sidebar dibuka/ditutup
+        toggleMenu(null);
+    };
+
 
     // ----------------------------------------------------------------------
     // --- 3. FUNGSI AUTOSAVE & UNDUH ---
@@ -504,6 +544,7 @@
             saveStatus.style.color = 'var(--danger-color)';
             console.error("Error saving content:", error);
         } else {
+            // Update cache agar konten baru langsung tersedia
             const cachedItem = allItemsData.find(i => i.id.toString() === itemUUID);
             if(cachedItem) cachedItem.content = newContent;
 
@@ -542,7 +583,7 @@
     };
     
     // ----------------------------------------------------------------------
-    // --- 4. FUNGSI RENDER (PERBAIKAN CREATEITEMELEMENT) ---
+    // --- 4. FUNGSI RENDER & INTERAKSI LIST ---
     // ----------------------------------------------------------------------
 
     function createItemElement(itemData) {
@@ -553,14 +594,7 @@
         li.id = itemId;
         const isFolder = itemData.type === 'folder';
 
-        let headerAttributes = '';
-        
-        // Tentukan ikon berdasarkan nama file jika ini adalah file
-        if (!isFolder) {
-            const icon = getFileIcon(itemData.name);
-            // Tambahkan data-icon langsung ke elemen header untuk diakses oleh CSS ::before
-            headerAttributes = `data-icon="${icon}"`; 
-        }
+        let itemIcon = isFolder ? '📁' : getFileIcon(itemData.name);
 
         const folderActions = isFolder 
             ? `
@@ -571,7 +605,8 @@
             : '';
 
         li.innerHTML = `
-            <div class="item-header" onclick="selectItem('${itemId}')" ${headerAttributes}>
+            <div class="item-header" onclick="selectItem('${itemId}')">
+                <span class="icon">${itemIcon}</span>
                 <span class="item-name">${itemData.name}</span>
                 <div class="controls" id="controls-${itemId}">
                     <button class="ellipsis-button" onclick="event.stopPropagation(); toggleMenu('${itemId}')">•••</button>
@@ -593,6 +628,7 @@
         items.forEach(item => { 
              const idStr = item.id.toString(); 
              const parentIdStr = item.parent_id ? item.parent_id.toString() : null;
+             // Pastikan konten di-cache
              itemsMap[idStr] = {...item, id: idStr, parent_id: parentIdStr, children: []}; 
         });
         
@@ -649,15 +685,16 @@
 
     window.fetchAndRenderItems = async function() {
         const rootList = document.getElementById('root-list');
-        rootList.innerHTML = '<li style="text-align: center;">Memuat data...</li>';
+        rootList.innerHTML = '<li style="text-align: center; color: var(--subtext);">Memuat data...</li>';
 
+        // Ambil semua data dengan konten untuk cache
         const { data, error } = await supabase
             .from('folder_items')
             .select('*'); 
 
         if (error) {
             console.error("Gagal mengambil data:", error);
-            rootList.innerHTML = `<li style="color: var(--danger-color);">ERROR: Gagal memuat data. Periksa kunci Supabase, tabel 'folder_items', dan RLS.</li>`;
+            rootList.innerHTML = `<li style="color: var(--danger-color); text-align: left;">ERROR: Gagal memuat data.</li>`;
             return;
         }
 
@@ -702,6 +739,7 @@
         const item = document.getElementById(itemId);
         const header = item.querySelector('.item-header');
         const nameSpan = item.querySelector('.item-name');
+        const iconSpan = item.querySelector('.icon');
         
         if (item.querySelector('.item-edit-input')) return; 
         
@@ -711,58 +749,62 @@
         input.type = 'text';
         input.className = 'item-edit-input';
         input.value = currentName;
-        input.style.display = 'block'; 
 
         nameSpan.style.display = 'none';
-        header.insertBefore(input, nameSpan);
+        iconSpan.style.display = 'none';
+        header.insertBefore(input, header.querySelector('.controls'));
         
         input.focus();
         input.select(); 
 
         const saveNewName = async (newName) => {
-            if (newName && newName.trim() !== currentName) {
+            const trimmedName = newName.trim();
+            if (trimmedName && trimmedName !== currentName) {
                 const itemUUID = itemId.replace('item-', '');
                 
                 const { error } = await supabase
                     .from('folder_items')
-                    .update({ name: newName.trim() })
+                    .update({ name: trimmedName })
                     .eq('id', itemUUID);
 
                 if (error) { 
                     console.error("Gagal mengupdate:", error); 
                     alert("Gagal mengupdate nama!"); 
-                    newName = currentName; 
+                    // Jika gagal, kembalikan ke nama lama
+                    nameSpan.textContent = currentName; 
+                } else {
+                    nameSpan.textContent = trimmedName;
+                    // Update ikon jika ini file
+                    if (item.classList.contains('file')) {
+                       iconSpan.textContent = getFileIcon(trimmedName);
+                    }
                 }
-                
-                nameSpan.textContent = newName.trim();
-                
+            } else {
+                 nameSpan.textContent = currentName;
             }
+            
             input.remove();
-            nameSpan.style.display = 'block'; 
+            nameSpan.style.display = 'flex'; 
+            iconSpan.style.display = 'block';
             fetchAndRenderItems(); 
         };
 
-        input.onblur = () => {
-            saveNewName(input.value);
-        };
-
+        input.onblur = () => { saveNewName(input.value); };
         input.onkeyup = (e) => {
-            if (e.key === 'Enter') {
-                input.blur(); 
-            } else if (e.key === 'Escape') {
-                saveNewName(currentName); 
-            }
+            if (e.key === 'Enter') { input.blur(); } 
+            else if (e.key === 'Escape') { saveNewName(currentName); }
         };
     };
 
     window.deleteItem = async function(itemId) {
-        if (!confirm('Yakin ingin menghapus item ini dan semua isinya?')) return;
+        if (!confirm('Yakin ingin menghapus item ini dan semua isinya? Aksi ini permanen!')) return;
         
         const itemUUID = itemId.replace('item-', '');
         
         const { error } = await supabase
             .from('folder_items')
-            .delete()
+            // Menggunakan rpc atau logic di RLS Supabase untuk menghapus anak-anak
+            .delete() 
             .eq('id', itemUUID);
 
         if (error) { 
@@ -795,10 +837,14 @@
         
         // 1. Toggle Folder
         if (isFolder) {
+            // Hindari toggle jika klik datang dari tombol ellipsis atau menu
             if (!event.target.closest('.controls')) {
                  item.classList.toggle('expanded'); 
             }
-            toggleMenu(null);
+             // Di mobile, tutup sidebar saat folder diklik untuk melihat konten (jika folder diklik)
+            if (window.innerWidth <= 900 && item.classList.contains('selected')) {
+                toggleSidebar();
+            }
         }
 
         // 2. Hapus Listener Autosave lama (jika ada)
@@ -821,14 +867,14 @@
 
         // 4. Ambil Konten & Atur Tombol Unduh
         if (!isFolder) {
-            editor.textContent = "Memuat konten...";
-            downloadButton.style.display = 'inline-block'; 
-            
+            // Ambil dari cache
             const itemData = allItemsData.find(i => i.id.toString() === itemUUID);
 
             if (itemData) {
                 editor.textContent = itemData.content || ''; 
             } else {
+                 editor.textContent = "Memuat konten...";
+                 // Ambil dari Supabase jika tidak ada di cache (fallback, jarang terjadi)
                  const { data, error } = await supabase
                     .from('folder_items')
                     .select('content')
@@ -843,14 +889,21 @@
                 }
             }
             
+            downloadButton.style.display = 'inline-block'; 
+
             // 5. Tambahkan Listener Autosave BARU
             autosaveListener = debouncedAutoSave; 
             editor.addEventListener('input', autosaveListener);
             saveStatus.textContent = 'Menunggu perubahan...';
             saveStatus.style.color = 'var(--subtext)';
+            
+            // Di mobile, tutup sidebar setelah memilih file
+            if (window.innerWidth <= 900) {
+                toggleSidebar();
+            }
 
         } else {
-            editor.textContent = `Folder Tidak Dapat Ditinjau`;
+            editor.textContent = `Folder: ${name}\n\nFolder tidak dapat diedit di editor ini. Silakan navigasi ke dalamnya atau pilih file di dalamnya.`;
             downloadButton.style.display = 'none'; 
             saveStatus.textContent = '';
         }
