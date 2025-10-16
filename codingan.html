@@ -3,28 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Codingan</title>
+    <title>Web Editor - Neon Dark</title>
     <link rel="icon" href="ikon2.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/monokai.min.css">
-    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror-addon-indent-guide@1.0.1/src/indent-guide.min.css">
+
     <style>
-        /* Variabel Warna dari Dashboard Khalid */
+        /* --- 1. VARIABEL WARNA NEON DARK --- */
         :root {
-            --bg-dark: #0b0e16;
-            --bg-card: #141829;
+            --bg-dark: #0b0e16; /* Latar belakang body utama */
+            --bg-editor: #1e1e1e; /* Latar belakang Monokai (disederhanakan) */
+            --bg-header: #141829;
             --accent: #00ffc3; /* Neon Cyan - Aksen utama */
             --accent2: #7a5cff; /* Ungu/Magenta - Aksen sekunder */
             --text: #f5f5f5;
-            --selection-bg: #5a709c; /* Warna seleksi biru tua/ungu yang lebih kuat */
+            --selection-bg: rgba(122, 92, 255, 0.4); /* Warna seleksi ungu transparan */
+            --header-height: 60px;
         }
 
-        /* CSS untuk Layout Editor */
+        /* --- 2. LAYOUT UTAMA --- */
+        * { box-sizing: border-box; }
         body {
-            font-family: sans-serif;
+            font-family: 'Poppins', sans-serif;
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -33,24 +36,28 @@
             background: var(--bg-dark);
             color: var(--text);
         }
-        /* ... (CSS Header dan Tombol tetap sama) ... */
+
+        /* Header Bar (dengan Glow) */
         .header-bar {
-            padding: 10px 20px;
-            background-color: var(--bg-card);
-            color: var(--text);
+            height: var(--header-height);
+            padding: 0 20px;
+            background-color: var(--bg-header);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(0, 255, 195, 0.2);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+            border-bottom: 2px solid var(--accent);
+            box-shadow: 0 4px 15px rgba(0, 255, 195, 0.3); /* Neon glow shadow */
             z-index: 20;
+            flex-shrink: 0;
         }
         .header-title {
-            font-size: 1.2em;
-            font-weight: bold;
+            font-size: 1.3em;
+            font-weight: 700;
             color: var(--accent);
-            text-shadow: 0 0 8px rgba(0,255,195,0.6);
+            text-shadow: 0 0 10px rgba(0,255,195,0.8);
         }
+
+        /* Tombol Aksi */
         .action-button {
             padding: 8px 18px;
             background-color: var(--accent);
@@ -58,24 +65,25 @@
             border: none;
             cursor: pointer;
             font-size: 14px;
-            border-radius: 6px;
-            font-weight: bold;
+            border-radius: 30px; /* Lebih elegan dan membulat */
+            font-weight: 600;
             transition: all 0.3s ease;
             box-shadow: 0 0 10px rgba(0,255,195,0.5);
+            min-width: 100px; /* Konsistensi ukuran */
         }
         .action-button:hover {
             background-color: #00e6a3;
-            box-shadow: 0 0 15px rgba(0,255,195,0.8);
-            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0,255,195,0.9);
+            transform: scale(1.05);
         }
 
-        /* Area utama */
+        /* Area utama (Editor & Preview) */
         .main-area {
             flex-grow: 1;
             position: relative;
         }
         
-        /* Gaya Khusus CodeMirror */
+        /* --- 3. GAYA KHUSUS CodeMirror --- */
         .CodeMirror {
             width: 100% !important;
             height: 100% !important;
@@ -84,53 +92,53 @@
             z-index: 10;
         }
         .cm-s-monokai.CodeMirror {
-             background: #1e1e1e;
-             color: #f8f8f2;
+             background: var(--bg-editor); /* Latar belakang lebih gelap dari header */
+             color: var(--text);
         }
+        
+        /* Kursor Neon */
         .CodeMirror-cursor {
             border-left: 2px solid var(--accent) !important;
         }
+        /* Nomor Baris Neon Ungu */
         .CodeMirror-linenumber {
             color: var(--accent2) !important;
+            opacity: 0.7;
+            padding: 0 10px 0 5px !important; /* Padding sedikit diubah agar lebih rapi */
         }
         
-        /* Highlight baris aktif (Latar belakangnya TIDAK OPAK/PENUH) */
+        /* Highlight baris aktif */
         .CodeMirror-activeline-background {
-            background: rgba(122, 92, 255, 0.1) !important;
+            background: rgba(122, 92, 255, 0.15) !important; /* Lebih tegas dari sebelumnya */
         }
         
-        /* 🔥 PERBAIKAN SELEKSI (BLOK KATA SAJA) 🔥 */
-        /* Seleksi yang dibuat oleh CodeMirror */
+        /* Seleksi Neon */
         .CodeMirror-selected {
             background-color: var(--selection-bg) !important; 
         }
-
-        /* Seleksi yang dibuat oleh browser (PENTING untuk kompatibilitas) */
         ::selection {
             background-color: var(--selection-bg) !important;
             color: var(--text) !important;
         }
-        /* Target khusus untuk CodeMirror, agar lebih spesifik */
         .CodeMirror ::selection {
             background-color: var(--selection-bg) !important;
             color: var(--text) !important;
         }
 
-
-        /* Highlight kecocokan kata (ketika dobel klik) */
+        /* Highlight kecocokan kata */
         .cm-matchhighlight {
-            background-color: rgba(0, 255, 195, 0.2) !important; /* Neon Cyan Transparan */
+            background-color: rgba(0, 255, 195, 0.3) !important; 
+            border-bottom: 2px solid var(--accent); /* Garis bawah neon */
         }
 
-        /* GARIS PENGHUBUNG INDENTASI (THE GUIDES) - TETAP ADA */
+        /* Garis Indentasi (Guides) */
         .cm-indent-guide {
             border-left: 1px solid var(--accent2) !important;
-            opacity: 0.4 !important; 
+            opacity: 0.3; /* Lebih halus */
             margin-right: 4px;
-            z-index: 1; 
         }
-        
-        /* CodeMirror berada di atas iframe */
+
+        /* Container Editor */
         #editorContainer {
             position: absolute;
             top: 0;
@@ -148,23 +156,83 @@
             position: absolute;
             top: 0;
             left: 0;
-            background-color: white;
+            background-color: #ffffff; /* Pastikan preview dimulai dengan latar belakang terang */
             z-index: 5;
             display: none;
+        }
+
+        /* --- 4. RESPONSIVITAS (Mobile/PC) --- */
+        @media (max-width: 600px) {
+            .header-bar {
+                padding: 0 15px;
+                height: 50px;
+            }
+            .header-title {
+                font-size: 1.1em;
+            }
+            .action-button {
+                padding: 6px 12px;
+                font-size: 13px;
+                min-width: 80px;
+            }
+            
+            /* Font CodeMirror di Mobile sedikit lebih kecil agar muat */
+            .CodeMirror {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="header-bar">
-        <span class="header-title">Editor Kode HTML</span>
-        <button id="modeButton" class="action-button" onclick="toggleMode()">Lihat</button>
+        <span class="header-title">⚡ Web Editor - Neon Dark ⚡</span>
+        <button id="modeButton" class="action-button" onclick="toggleMode()">Lihat (Ctrl+Q)</button>
     </div>
 
     <div class="main-area">
         <div id="editorContainer">
             <textarea id="combinedCode">
-Isi Disini...
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Preview</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #101628; /* Latar gelap untuk Neon */
+            color: #f0f0f0;
+        }
+        .neon-box {
+            background-color: #141829;
+            padding: 30px 40px;
+            border-radius: 15px;
+            box-shadow: 0 0 50px rgba(0, 255, 195, 0.8); /* Glow utama */
+            text-align: center;
+        }
+        h1 {
+            color: #00ffc3; /* Neon Cyan */
+            text-shadow: 0 0 10px #00ffc3;
+        }
+        p {
+            color: #7a5cff; /* Neon Ungu */
+        }
+    </style>
+</head>
+<body>
+    <div class="neon-box">
+        <h1>Selamat Datang di Preview!</h1>
+        <p>Edit kode di sebelah kiri dan tekan 'Lihat' untuk melihat hasil instan.</p>
+    </div>
+</body>
+</html>
             </textarea>
         </div>
         <iframe id="previewFrame"></iframe>
@@ -177,17 +245,16 @@ Isi Disini...
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/match-highlighter.min.js"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/codemirror-addon-indent-guide@1.0.1/dist/indent-guide.min.js"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/match-highlighter.min.js"></script>
-
 
     <script>
         const previewFrame = document.getElementById('previewFrame');
         const modeButton = document.getElementById('modeButton');
         let isEditing = true;
         let myCodeMirror;
+        let autoUpdateTimeout;
 
         document.addEventListener('DOMContentLoaded', () => {
             const textarea = document.getElementById('combinedCode');
@@ -200,46 +267,64 @@ Isi Disini...
                 lineWrapping: true,
                 autoCloseTags: true, 
                 matchBrackets: true,
-                
                 indentGuide: true, 
                 highlightSelectionMatches: {
                     showToken: /\w/ 
                 },
             });
+            
+            // Atur agar CodeMirror mengisi seluruh area saat pertama kali dimuat
+            myCodeMirror.setSize("100%", "100%");
 
+            // Tambahkan event listener untuk update preview secara otomatis (debounce)
+            myCodeMirror.on("change", () => {
+                clearTimeout(autoUpdateTimeout);
+                autoUpdateTimeout = setTimeout(() => {
+                    updatePreview();
+                }, 300); // Tunda update selama 300ms
+            });
+
+            // Fokus dan update awal
             myCodeMirror.focus();
             updatePreview();
         });
 
 
         function updatePreview() {
-            const codeContent = myCodeMirror ? myCodeMirror.getValue() : document.getElementById('combinedCode').value;
+            const codeContent = myCodeMirror.getValue();
             
             const preview = previewFrame.contentWindow.document;
 
             preview.open();
+            // Tulis konten
             preview.write(codeContent);
             preview.close();
         }
 
-        function toggleMode() {
+        window.toggleMode = function() {
+            // Selalu update preview sebelum beralih mode
             updatePreview(); 
 
             if (isEditing) {
+                // Beralih ke mode Preview
                 document.getElementById('editorContainer').style.display = 'none';
                 previewFrame.style.display = 'block';
                 modeButton.textContent = 'Kembali';
                 isEditing = false;
             } else {
+                // Beralih ke mode Editor
                 document.getElementById('editorContainer').style.display = 'block';
                 previewFrame.style.display = 'none';
-                modeButton.textContent = 'Lihat';
+                modeButton.textContent = 'Lihat (Ctrl+Q)';
                 isEditing = true;
+                // Penting: CodeMirror.refresh() agar tampilan tidak rusak saat kembali dari display:none
+                myCodeMirror.refresh();
                 myCodeMirror.focus();
             }
         }
         
         document.addEventListener('keydown', function(event) {
+            // Shortcut Ctrl+Q atau Cmd+Q
             if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'q') {
                 event.preventDefault();
                 toggleMode();
