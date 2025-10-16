@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Editor - Neon Dark</title>
+    <title>Web Editor</title>
     <link rel="icon" href="ikon2.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -186,8 +186,8 @@
 <body>
 
     <div class="header-bar">
-        <span class="header-title">⚡ Web Editor - Neon Dark ⚡</span>
-        <button id="modeButton" class="action-button" onclick="toggleMode()">Lihat (Ctrl+Q)</button>
+        <span class="header-title">⚡ Web Editor ⚡</span>
+        <button id="modeButton" class="action-button" onclick="toggleMode()">Hasil</button>
     </div>
 
     <div class="main-area">
@@ -275,7 +275,7 @@
                 // Beralih ke mode Editor
                 document.getElementById('editorContainer').style.display = 'block';
                 previewFrame.style.display = 'none';
-                modeButton.textContent = 'Lihat (Ctrl+Q)';
+                modeButton.textContent = 'Hasil';
                 isEditing = true;
                 // Penting: CodeMirror.refresh() agar tampilan tidak rusak saat kembali dari display:none
                 myCodeMirror.refresh();

@@ -442,20 +442,15 @@
     
     <div class="content-panel">
         <div class="content-header-row">
-             <h3 id="content-title">Pilih File untuk Melihat Konten</h3>
+             <h3 id="content-title">Preview File</h3>
              <button id="download-button" onclick="downloadFileContent()"><span style="margin-right: 5px;">⬇️</span> Unduh</button>
         </div>
         <p style="color: var(--subtext); font-size: 0.9em;">Tipe: <span id="content-type"></span></p>
         
         <div class="file-content" id="file-editor" contenteditable="false">
+                             
+          
             Selamat datang di File Explorer!
-            
-            Gunakan sidebar di kiri untuk:
-            1. Menambah folder/file baru.
-            2. Mengedit/menghapus item.
-            3. Memilih file untuk mengedit konten di sini.
-
-            *Ini adalah editor konten. Perubahan akan disimpan secara otomatis.*
         </div>
         
         <span id="save-status"></span>
@@ -903,7 +898,7 @@
             }
 
         } else {
-            editor.textContent = `Folder: ${name}\n\nFolder tidak dapat diedit di editor ini. Silakan navigasi ke dalamnya atau pilih file di dalamnya.`;
+            editor.textContent = `Folder: ${name}\n\nFolder tidak dapat diedit di editor ini.`;
             downloadButton.style.display = 'none'; 
             saveStatus.textContent = '';
         }
