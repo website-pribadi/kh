@@ -139,7 +139,7 @@ footer{
 /* JADWAL PELAJARAN (REVISI SCROLLBAR) */
 /* ==================================== */
 .schedule-wrapper {
-    max-height: 400px; 
+    max-height: 350px; 
     overflow-y: auto;
     flex-grow: 1; 
     border: 1px solid var(--border); 
@@ -409,6 +409,7 @@ function updateDate(){ const date=new Date(); document.getElementById('today').t
 function updateGreeting(){ const hour=new Date().getHours(); let g=""; if(hour>=4&&hour<11)g="Selamat Pagi"; else if(hour>=11&&hour<15) g="Selamat Siang"; else if(hour>=15&&hour<18) g="Selamat Sore"; else g="Selamat Malam"; document.getElementById("greeting").textContent=g+", Khalid";}
 function updateClock(){ const now=new Date(); let h=now.getHours().toString().padStart(2,'0'), m=now.getMinutes().toString().padStart(2,'0'), s=now.getSeconds().toString().padStart(2,'0'); document.getElementById("clock").textContent=`${h}:${m}:${s} WIB`;}
 updateDate(); updateGreeting(); updateClock();
+// Memanggil loadJadwal di interval ini akan otomatis memanggil renderTable
 setInterval(()=>{ updateDate(); updateGreeting(); updateClock(); loadJadwal(); },1000);
 
 
@@ -537,31 +538,47 @@ function renderTugas(tasks) {
 // Jadwal Pelajaran (Tampilkan berdasarkan Hari Ini)
 // ======================
 const tbody = document.querySelector("#schedule-table tbody");
-let jadwalData=[];
+let jadwalData=[]; // Cache data jadwal
 
 async function loadJadwal(){
+  // Hanya fetch jika cache kosong, atau mungkin setiap beberapa menit.
+  // Tapi untuk sekarang, kita ikuti logic awal (fetch tiap detik) agar renderTable terpanggil.
+  // Cara yang lebih baik adalah memisahkan renderTable dari interval.
   const {data,error} = await supa.from("jadwal_pelajaran").select("*").order('id');
   if(error){ console.error(error); return; }
   jadwalData = data;
-  renderTable();
+  renderTable(); // Panggil renderTable setelah data di-fetch
 }
 
+// *** FUNGSI YANG DIMODIFIKASI ***
 function renderTable(){
   tbody.innerHTML = "";
   const now = new Date();
   const nowMinutes = now.getHours()*60 + now.getMinutes();
-  const todayName = now.toLocaleDateString('id-ID',{weekday:'long'}); 
+  const currentHour = now.getHours();
+  
+  let targetDate = new Date(now); // Salin tanggal saat ini
+  let isToday = true;
+
+  // --- LOGIKA BARU ---
+  // Jika jam 20:00 (8 malam) atau lebih, tampilkan jadwal untuk besok
+  if (currentHour >= 20) {
+      targetDate.setDate(targetDate.getDate() + 1);
+      isToday = false; // Tandai bahwa kita sedang melihat jadwal besok
+  }
+  // --- AKHIR LOGIKA BARU ---
+
+  const targetDayName = targetDate.toLocaleDateString('id-ID',{weekday:'long'}); 
   let hasSchedule = false;
 
-  // 1. Filter jadwal hanya untuk hari ini
-  const scheduleForToday = jadwalData.filter(item => item.hari === todayName);
+  // 1. Filter jadwal hanya untuk hari target (hari ini atau besok)
+  const scheduleForDisplay = jadwalData.filter(item => item.hari === targetDayName);
 
-  if (scheduleForToday && scheduleForToday.length > 0) {
+  if (scheduleForDisplay && scheduleForDisplay.length > 0) {
       hasSchedule = true;
       
       // 2. Urutkan mata pelajaran hari ini berdasarkan jam mulai
-      scheduleForToday.sort((a, b) => {
-          // Fungsi untuk mengubah format jam "HH:MM" menjadi menit total
+      scheduleForDisplay.sort((a, b) => {
           const timeToMinutes = (timeStr) => {
             if (!timeStr) return 0;
             const parts = timeStr.split(':').map(Number);
@@ -574,11 +591,12 @@ function renderTable(){
       });
 
       // 3. Tambahkan Baris Mata Pelajaran
-      scheduleForToday.forEach(item => {
+      scheduleForDisplay.forEach(item => {
         let rowClass = '';
         
-        // Cek apakah mata pelajaran sedang aktif saat ini
-        if(item.jam && item.jam.includes('–')){
+        // --- LOGIKA BARU ---
+        // Hanya cek kelas aktif jika kita sedang menampilkan jadwal HARI INI
+        if(isToday && item.jam && item.jam.includes('–')){
             const [start, end] = item.jam.split('–').map(t=>t.trim());
             const startParts = start.split(':');
             const endParts   = end.split(':');
@@ -587,11 +605,13 @@ function renderTable(){
                 const startMinutes = parseInt(startParts[0])*60 + parseInt(startParts[1]);
                 const endMinutes   = parseInt(endParts[0])*60 + parseInt(endParts[1]);
 
+                // Cek kelas aktif berdasarkan 'now' (waktu sebenarnya)
                 if(nowMinutes >= startMinutes && nowMinutes < endMinutes){ 
                     rowClass = 'active-class'; 
                 }
             }
         }
+        // --- AKHIR LOGIKA BARU ---
         
         const tr = document.createElement('tr');
         tr.className = rowClass;
@@ -606,13 +626,29 @@ function renderTable(){
   }
 
   // Tampilkan/sembunyikan pesan "Tidak ada jadwal"
-  document.getElementById('no-schedule').style.display = hasSchedule ? "none" : "block";
+  const noScheduleEl = document.getElementById('no-schedule');
+  noScheduleEl.style.display = hasSchedule ? "none" : "block";
   document.getElementById('schedule-table').style.display = hasSchedule ? 'table' : 'none';
+  
+  // --- LOGIKA BARU ---
+  // Ubah judul kartu dan teks pesan jika tidak ada jadwal
+  const cardTitle = document.querySelector("#schedule-card h3");
+  if (isToday) {
+    cardTitle.textContent = "Jadwal Pelajaran Hari Ini";
+  } else {
+    cardTitle.textContent = "Jadwal Pelajaran Besok";
+  }
+
+  if (!hasSchedule) {
+      noScheduleEl.textContent = `Tidak ada jadwal pelajaran untuk ${targetDayName}. Waktunya santai!`;
+  }
+  // --- AKHIR LOGIKA BARU ---
 }
 
 // ======================
 // Load Data Awal
 // ======================
+// Fungsi-fungsi ini akan dipanggil saat halaman dimuat pertama kali
 loadJadwal();
 loadTugas(); 
 </script>
